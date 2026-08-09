@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#071d3b" />
+    <link rel="icon" href="assets/favicon.ico" sizes="any" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <meta
+      name="description"
+      content="Thiệp mời tham dự Lễ Tốt nghiệp ngày 22/08/2026 tại UMT."
+    />
+    <title>Graduation Invitation · 22.08.2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <main class="page-shell">
+      <div class="toolbar">
+        <a class="home-link" href="index.html" aria-label="Về trang hành trình">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg>
+          Hành trình 4 năm
+        </a>
+        <button class="download-button" id="downloadButton" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14" />
+          </svg>
+          <span>Tải thiệp PNG</span>
+        </button>
+      </div>
+
+      <article class="invitation" id="invitation">
+        <svg class="circuit circuit-top" viewBox="0 0 300 180" aria-hidden="true">
+          <path d="M300 20h-63l-22 22h-55l-27 27H74" />
+          <path d="M300 68h-48l-18 18h-37" />
+          <path d="M300 126h-73l-22-22h-71l-20 20H50" />
+          <circle cx="69" cy="69" r="4" /><circle cx="193" cy="86" r="4" />
+          <circle cx="46" cy="124" r="4" />
+        </svg>
+
+        <section class="visual-panel">
+          <div class="brand-mark" aria-label="Information Technology">
+            <svg viewBox="0 0 40 40" aria-hidden="true">
+              <rect x="8" y="8" width="24" height="24" rx="5" />
+              <path d="M14 1v7m6-7v7m6-7v7M14 32v7m6-7v7m6-7v7M1 14h7m-7 6h7m-7 6h7m24-12h7m-7 6h7m-7 6h7" />
+              <path d="M15 20h10M20 15v10" />
+            </svg>
+            <span>IT · INFRASTRUCTURE</span>
+          </div>
+
+          <div class="portrait-frame">
+            <img
+              id="portraitImage"
+              src="assets/portrait-placeholder.svg"
+              alt="Ảnh chân dung của tân cử nhân"
+            />
+            <label class="photo-control" for="photoInput" title="Chọn ảnh chân dung">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7h3l2-3h6l2 3h3v12H4V7Z" /><circle cx="12" cy="13" r="4" />
+              </svg>
+              <span>Thay ảnh</span>
+            </label>
+            <input id="photoInput" type="file" accept="image/*" hidden />
+            <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+            <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+          </div>
+
+          <div class="graduate-label">
+            <span>CLASS OF</span>
+            <strong>2026</strong>
+          </div>
+        </section>
+
+        <section class="content-panel">
+          <svg class="tech-blueprint" viewBox="0 0 700 700" aria-hidden="true">
+            <!-- Cloud -->
+            <g class="blueprint-icon icon-cloud">
+              <path d="M54 104h47a18 18 0 0 0 1.5-36A27 27 0 0 0 51 63a21 21 0 0 0 3 41Z" />
+              <path d="M71 81h17m-8-8 8 8-8 8" />
+            </g>
+            <!-- Code -->
+            <g class="blueprint-icon icon-code">
+              <path d="m585 168-19 17 19 17m35-34 19 17-19 17m-10-47-16 61" />
+            </g>
+            <!-- Server -->
+            <g class="blueprint-icon icon-server">
+              <rect x="48" y="476" width="65" height="27" rx="4" />
+              <rect x="48" y="512" width="65" height="27" rx="4" />
+              <path d="M60 489h1m11 0h27M60 525h1m11 0h27" />
+            </g>
+            <!-- Connected nodes and circuit traces -->
+            <g class="blueprint-network">
+              <path d="M0 137h30l15-15h42M700 243h-40l-18-18h-45M700 460h-28l-20 20h-48M0 585h38l18-18h48" />
+              <circle cx="87" cy="122" r="3" /><circle cx="597" cy="225" r="3" />
+              <circle cx="604" cy="480" r="3" /><circle cx="104" cy="567" r="3" />
+              <path d="M470 625h38l13-13h39l14 14h51" />
+              <circle cx="470" cy="625" r="3" /><circle cx="625" cy="626" r="3" />
+            </g>
+          </svg>
+          <header>
+            <p class="eyebrow">You are invited to my</p>
+            <h1>GRADUATION<br /><span>CEREMONY</span></h1>
+            <div class="title-line"><span></span><i></i><span></span></div>
+          </header>
+
+          <div class="guest-name">
+            <span>Thân mời</span>
+            <input
+              id="guestName"
+              type="text"
+              maxlength="50"
+              placeholder="Nhập tên người bạn muốn mời..."
+              aria-label="Tên người được mời"
+            />
+          </div>
+
+          <p class="invitation-copy">
+            Một cột mốc đáng nhớ sẽ trọn vẹn hơn khi có bạn ở bên. Trân trọng mời bạn
+            đến chung vui và lưu lại những khoảnh khắc thật đẹp cùng mình!
+          </p>
+
+          <div class="date-lockup" aria-label="Ngày 22 tháng 8 năm 2026">
+            <div><span>Thứ Bảy</span><small>Saturday</small></div>
+            <strong>22</strong>
+            <div><span>Tháng 08</span><small>August · 2026</small></div>
+          </div>
+
+          <div class="event-journey">
+            <div class="journey-heading">
+              <span>Lịch trình</span>
+              <small>Graduation day timeline</small>
+            </div>
+            <div class="timeline">
+              <div class="timeline-step">
+                <i></i><strong>07:30</strong><span>Lễ bắt đầu</span>
+              </div>
+              <div class="timeline-step">
+                <i></i><strong>11:30</strong><span>Kết thúc buổi lễ</span>
+              </div>
+              <div class="timeline-step active">
+                <i></i><strong>11:45</strong><span>Gặp gỡ bạn bè</span>
+              </div>
+              <div class="timeline-step active">
+                <i></i><strong>13:30</strong><span>Kết thúc gặp gỡ</span>
+              </div>
+            </div>
+            <div class="venue-strip">
+              <div class="venue-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z" />
+                  <circle cx="12" cy="9" r="2.5" />
+                </svg>
+              </div>
+              <div>
+                <span>Địa điểm gặp gỡ</span>
+                <strong>Trường Đại học Quản lý và Công nghệ Thành phố Hồ Chí Minh</strong>
+                <small>Số 2 Đường 60CL, Phường Cát Lái, Thành phố Hồ Chí Minh</small>
+              </div>
+              <svg class="venue-route" viewBox="0 0 70 52" aria-label="Biểu tượng cơ sở dữ liệu">
+                <ellipse cx="35" cy="10" rx="20" ry="7" />
+                <path d="M15 10v16c0 4 9 7 20 7s20-3 20-7V10" />
+                <path d="M15 26v16c0 4 9 7 20 7s20-3 20-7V26" />
+              </svg>
+            </div>
+          </div>
+
+          <footer class="invite-footer">
+            <div>
+              <span>Buổi lễ</span>
+              <strong>07:30 — 11:30</strong>
+            </div>
+            <div class="contact-info">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 3h3l1.5 4-2 1.7a15 15 0 0 0 5.8 5.8l1.7-2L21 14v3c0 2.2-1.8 4-4 4C9.3 20.5 3.5 14.7 3 7a4 4 0 0 1 4-4Z" />
+              </svg>
+              <span>Liên hệ</span>
+              <strong>0818126177</strong>
+            </div>
+            <p>Save the date<br /><strong>22.08.2026</strong></p>
+          </footer>
+        </section>
+      </article>
+
+      <p class="helper-text">
+        Chạm <strong>“Thay ảnh”</strong> để xem trước ảnh của bạn, sau đó tải thiệp về máy.
+      </p>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

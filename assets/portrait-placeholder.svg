@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0b5791"/><stop offset="1" stop-color="#051a34"/>
+    </linearGradient>
+    <radialGradient id="glow"><stop stop-color="#27cbff" stop-opacity=".3"/><stop offset="1" stop-color="#27cbff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <circle cx="400" cy="430" r="330" fill="url(#glow)"/>
+  <g fill="none" stroke="#5edfff" opacity=".17">
+    <path d="M0 120h180l60 60h150M800 260H620l-80 80H430M0 760h190l70-70h160M800 840H620l-60-60H450"/>
+    <circle cx="395" cy="350" r="105" fill="#9eeaff" fill-opacity=".14" stroke-width="3"/>
+    <path d="M190 870c18-210 115-330 205-330s187 120 205 330" fill="#9eeaff" fill-opacity=".14" stroke-width="3"/>
+  </g>
+  <g fill="#d4f5ff" font-family="Arial, sans-serif" text-anchor="middle">
+    <text x="400" y="475" font-size="34" font-weight="700">ẢNH CỦA BẠN</text>
+    <text x="400" y="520" font-size="18" opacity=".65">YOUR PHOTO HERE</text>
+  </g>
+</svg>
