@@ -10,6 +10,44 @@ const revealObserver = new IntersectionObserver(
 
 document.querySelectorAll(".reveal").forEach((element) => revealObserver.observe(element));
 
+const infrastructureArtwork = `
+  <svg class="chapter-infra" viewBox="0 0 1200 900" aria-hidden="true">
+    <g class="infra-circuits">
+      <path d="M0 126h95l34 34h100l28-28h88" />
+      <path d="M1200 265h-84l-31 31h-89l-25-25h-63" />
+      <path d="M0 724h66l30-30h108l25 25h84" />
+      <path d="M1200 784h-118l-25-25h-81" />
+      <circle cx="345" cy="132" r="5"/><circle cx="908" cy="271" r="5"/>
+      <circle cx="313" cy="719" r="5"/><circle cx="976" cy="759" r="5"/>
+    </g>
+    <g class="infra-server">
+      <rect x="40" y="300" width="132" height="220" rx="10"/>
+      <rect x="56" y="321" width="100" height="43" rx="4"/>
+      <rect x="56" y="377" width="100" height="43" rx="4"/>
+      <rect x="56" y="433" width="100" height="43" rx="4"/>
+      <path d="M69 342h2m13 0h54M69 398h2m13 0h54M69 454h2m13 0h54M70 499h72"/>
+      <circle cx="145" cy="342" r="4"/><circle cx="145" cy="398" r="4"/><circle cx="145" cy="454" r="4"/>
+    </g>
+    <g class="infra-cloud">
+      <path d="M1019 137h91a31 31 0 0 0 2-62 48 48 0 0 0-91-9 37 37 0 0 0-2 71Z"/>
+      <path d="M1041 105h48m-24-22v44"/>
+    </g>
+    <g class="infra-network">
+      <circle cx="1032" cy="559" r="17"/><circle cx="1130" cy="520" r="17"/>
+      <circle cx="1130" cy="640" r="17"/><circle cx="1040" cy="685" r="17"/>
+      <circle cx="965" cy="620" r="17"/>
+      <path d="m1048 552 66-26m16 11v86m-16 24-59 30m-30-1-46-45m3-17 35-43"/>
+    </g>
+    <g class="infra-data">
+      <ellipse cx="291" cy="557" rx="44" ry="16"/>
+      <path d="M247 557v70c0 9 20 16 44 16s44-7 44-16v-70m-88 35c0 9 20 16 44 16s44-7 44-16"/>
+    </g>
+  </svg>`;
+
+document.querySelectorAll(".year-chapter").forEach((chapter) => {
+  chapter.insertAdjacentHTML("afterbegin", infrastructureArtwork);
+});
+
 const photos = [...document.querySelectorAll(".photo")];
 const toast = document.querySelector("#uploadToast");
 const fileInput = document.createElement("input");
