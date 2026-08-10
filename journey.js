@@ -89,7 +89,7 @@ function renderRandomWishes() {
     heroWishGrid.innerHTML = '<small>Chưa có lời chúc nào — gửi lời đầu tiên nha.</small>';
     return;
   }
-  const amount = Math.min(wishes.length, 2 + Math.floor(Math.random() * 2));
+  const amount = Math.min(wishes.length, 2);
   const selection = shuffle(wishes).slice(0, amount);
   wishGrid.innerHTML = selection.map((wish) => {
     const date = new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(wish.created_at));
