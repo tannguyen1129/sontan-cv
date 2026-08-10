@@ -1,7 +1,8 @@
 const config = window.JOURNEY_CONFIG || {};
 const toast = document.querySelector("#toast");
 const heroPhoto = document.querySelector("#heroPhoto");
-const heroPhotoTrack = document.querySelector("#heroPhotoTrack");
+const heroPhotoTrackOne = document.querySelector("#heroPhotoTrackOne");
+const heroPhotoTrackTwo = document.querySelector("#heroPhotoTrackTwo");
 const photoGrid = document.querySelector("#photoGrid");
 const wishGrid = document.querySelector("#wishGrid");
 const wishForm = document.querySelector("#wishForm");
@@ -49,11 +50,16 @@ function photoUrl(name, version = "") {
 
 function renderHeroMarquee() {
   if (!photos.length) return;
-  const selection = shuffle(photos).slice(0, Math.min(8, photos.length));
-  const loop = [...selection, ...selection];
-  heroPhotoTrack.innerHTML = loop.map((photo, index) => `<div class="hero-slide" style="background-image:url('${photo.url.replace(/'/g, "%27")}')"><span>${String((index % selection.length) + 1).padStart(2, "0")}</span></div>`).join("");
-  heroPhotoTrack.style.setProperty("--slide-count", selection.length);
-  heroPhotoTrack.style.setProperty("--marquee-duration", `${Math.max(20, selection.length * 5)}s`);
+  const selection = shuffle(photos).slice(0, Math.min(12, photos.length));
+  const middle = Math.max(1, Math.ceil(selection.length / 2));
+  const rows = [selection.slice(0, middle), selection.slice(middle)];
+  if (!rows[1].length) rows[1] = rows[0];
+  [heroPhotoTrackOne, heroPhotoTrackTwo].forEach((track, rowIndex) => {
+    const row = rows[rowIndex];
+    const loop = [...row, ...row];
+    track.innerHTML = loop.map((photo, index) => `<figure class="hero-slide"><img src="${escapeHtml(photo.url)}" alt="Khoảnh khắc tốt nghiệp ngẫu nhiên" loading="eager" decoding="async" /><span>${String((index % row.length) + 1).padStart(2, "0")}</span></figure>`).join("");
+    track.style.setProperty("--marquee-duration", `${Math.max(24, row.length * 7)}s`);
+  });
   heroPhoto.classList.add("has-image");
 }
 
