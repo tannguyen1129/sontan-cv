@@ -32,5 +32,8 @@ services:
         value: nosniff
     routes:
       - type: rewrite
+        source: /cdn-test/*
+        destination: /assets/cdn-test.svg
+      - type: rewrite
         source: /*
         destination: /index.html
