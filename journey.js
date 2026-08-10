@@ -21,6 +21,7 @@ let adminUser = null;
 let photos = [];
 let wishes = [];
 let toastTimer;
+let photoShuffleTimer;
 
 function showToast(message) {
   toast.textContent = message;
@@ -63,17 +64,20 @@ function photoUrl(name, version = "") {
 
 function renderHeroMarquee() {
   if (!photos.length) return;
-  const selection = shuffle(photos).slice(0, Math.min(12, photos.length));
+  const selection = shuffle(photos);
   const middle = Math.max(1, Math.ceil(selection.length / 2));
   const rows = [selection.slice(0, middle), selection.slice(middle)];
   if (!rows[1].length) rows[1] = rows[0];
+  const loopDuration = Math.max(24, middle * 7);
   [heroPhotoTrackOne, heroPhotoTrackTwo].forEach((track, rowIndex) => {
     const row = rows[rowIndex];
     const loop = [...row, ...row];
     track.innerHTML = loop.map((photo, index) => `<figure class="hero-slide"><img src="${escapeHtml(photo.url)}" alt="Khoảnh khắc tốt nghiệp ngẫu nhiên" loading="eager" decoding="async" /><span>${String((index % row.length) + 1).padStart(2, "0")}</span></figure>`).join("");
-    track.style.setProperty("--marquee-duration", `${Math.max(24, row.length * 7)}s`);
+    track.style.setProperty("--marquee-duration", `${loopDuration}s`);
   });
   heroPhoto.classList.add("has-image");
+  clearTimeout(photoShuffleTimer);
+  photoShuffleTimer = setTimeout(renderHeroMarquee, loopDuration * 1000);
 }
 
 function renderRandomPhotos() {
