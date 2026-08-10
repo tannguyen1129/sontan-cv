@@ -164,6 +164,19 @@ document.querySelector("#shuffleGallery").addEventListener("click", renderRandom
 document.querySelector("#shuffleWishes").addEventListener("click", renderRandomWishes);
 wishMessage.addEventListener("input", () => { messageCount.textContent = wishMessage.value.length; });
 
+document.querySelectorAll("[data-open]").forEach((button) => button.addEventListener("click", () => {
+  const dialog = document.querySelector(`#${button.dataset.open}`);
+  if (dialog && !dialog.open) dialog.showModal();
+}));
+document.querySelectorAll(".content-dialog").forEach((dialog) => {
+  dialog.querySelector(".dialog-close").addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", (event) => {
+    const bounds = dialog.getBoundingClientRect();
+    const outside = event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom;
+    if (outside) dialog.close();
+  });
+});
+
 wishForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!client) return showToast("Sổ lời chúc chưa sẵn sàng.");
@@ -261,3 +274,6 @@ adminWishList.addEventListener("click", async (event) => {
 });
 
 initialize();
+
+if (location.hash === "#wishes") document.querySelector("#wishDialog").showModal();
+if (location.hash === "#moments") document.querySelector("#galleryDialog").showModal();

@@ -19,7 +19,7 @@
         <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="8" width="24" height="24" rx="5"/><path d="M14 1v7m6-7v7m6-7v7M14 32v7m6-7v7m6-7v7M1 14h7m-7 6h7m-7 6h7m24-12h7m-7 6h7m-7 6h7M15 20h10M20 15v10"/></svg>
         <span>SON TAN<small>GRADUATION · 2026</small></span>
       </a>
-      <nav aria-label="Điều hướng chính"><a href="#moments">Khoảnh khắc</a><a href="#wishes">Lời chúc</a></nav>
+      <nav aria-label="Điều hướng chính"><button data-open="galleryDialog" type="button">Khoảnh khắc</button><button data-open="wishDialog" type="button">Lời chúc</button></nav>
     </header>
 
     <main id="top">
@@ -29,7 +29,7 @@
           <p class="kicker"><i></i> 22 · 08 · 2026</p>
           <h1>MỘT CHƯƠNG<br /><span>VỪA KHÉP LẠI.</span></h1>
           <p class="hero-lead">Bốn năm đại học được giữ lại bằng những tấm hình, những người đã gặp và những lời chúc dành cho hành trình tiếp theo.</p>
-          <div class="hero-actions"><a class="primary-button" href="#wishes">Gửi lời chúc <span>↘</span></a><a class="plain-link" href="#moments">Xem khoảnh khắc</a></div>
+          <div class="hero-actions"><button class="primary-button" data-open="wishDialog" type="button">Gửi lời chúc <span>↘</span></button><button class="plain-link" data-open="galleryDialog" type="button">Xem khoảnh khắc</button></div>
         </div>
         <figure class="hero-photo" id="heroPhoto">
           <div class="photo-placeholder"><span>PHOTO STREAM</span><small>Ảnh từ thư viện sẽ xuất hiện tại đây</small></div>
@@ -45,14 +45,22 @@
         <div><small>ĐỊA ĐIỂM</small><strong>Trường Đại học Quản lý và Công nghệ Thành phố Hồ Chí Minh</strong><span>Số 2 Đường 60CL, Phường Cát Lái, Thành phố Hồ Chí Minh</span></div>
       </section>
 
-      <section class="moments" id="moments">
-        <div class="section-heading"><div><p>01 · RANDOM MEMORIES</p><h2>Mỗi lần ghé,<br /><span>một ký ức khác.</span></h2></div><p>Những tấm hình không cần theo thứ tự. Chúng chỉ cần đưa mình trở lại đúng khoảnh khắc ấy.</p></div>
-        <div class="photo-grid" id="photoGrid" aria-live="polite"></div>
-        <button class="secondary-button" id="shuffleGallery" type="button">Xáo trộn thư viện ↻</button>
-      </section>
+    </main>
 
-      <section class="wishes" id="wishes">
-        <div class="wish-intro"><p>02 · MESSAGE BOARD</p><h2>Để lại một điều<br />cho <span>chương mới.</span></h2><p>Không cần viết thật dài. Một câu chúc, một kỷ niệm hay chỉ một lời nhắn cũng đủ để ngày này đáng nhớ hơn.</p></div>
+    <footer><p>Sơn Tân © 2026</p><button id="adminButton" type="button">Quản trị</button><a href="#top">Lên đầu trang ↑</a></footer>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <dialog class="content-dialog gallery-dialog" id="galleryDialog">
+      <button class="dialog-close" type="button" aria-label="Đóng">×</button>
+      <div class="dialog-heading"><p>RANDOM MEMORIES</p><h2>Mỗi lần mở,<br /><span>một ký ức khác.</span></h2></div>
+      <div class="photo-grid" id="photoGrid" aria-live="polite"></div>
+      <button class="secondary-button" id="shuffleGallery" type="button">Xáo trộn thư viện ↻</button>
+    </dialog>
+
+    <dialog class="content-dialog wish-dialog" id="wishDialog">
+      <button class="dialog-close" type="button" aria-label="Đóng">×</button>
+      <div class="dialog-heading"><p>MESSAGE BOARD</p><h2>Gửi một lời cho <span>chương mới.</span></h2></div>
+      <div class="wish-dialog-layout">
         <form class="wish-form" id="wishForm">
           <div class="form-heading"><span>NEW MESSAGE</span><i></i></div>
           <label>Tên của bạn<input id="wishName" name="name" maxlength="60" autocomplete="name" placeholder="Bạn muốn mình nhớ bạn là ai?" required /></label>
@@ -60,18 +68,9 @@
           <input class="honeypot" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
           <div class="form-footer"><small><span id="messageCount">0</span>/500 ký tự</small><button class="primary-button" type="submit">Gửi lời chúc <span>→</span></button></div>
         </form>
-      </section>
-
-      <section class="wish-stream" aria-labelledby="wishStreamTitle">
-        <div class="stream-head"><div><p>LIVE FROM THE GUESTBOOK</p><h2 id="wishStreamTitle">Những lời chúc ngẫu nhiên</h2></div><button id="shuffleWishes" type="button">Đổi lời chúc ↻</button></div>
-        <div class="wish-grid" id="wishGrid" aria-live="polite"><p class="empty-state">Đang tải những lời chúc...</p></div>
-      </section>
-
-      <section class="finale"><p>THE NEXT CHAPTER BEGINS</p><h2>Và rồi, mình<br /><span>tốt nghiệp.</span></h2><p>Cảm ơn vì đã xuất hiện trong ngày đặc biệt này.</p></section>
-    </main>
-
-    <footer><p>Sơn Tân © 2026</p><button id="adminButton" type="button">Quản trị</button><a href="#top">Lên đầu trang ↑</a></footer>
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        <div class="wish-panel"><div class="stream-head"><p>RANDOM WISHES</p><button id="shuffleWishes" type="button">Đổi lời chúc ↻</button></div><div class="wish-grid" id="wishGrid" aria-live="polite"><p class="empty-state">Đang tải những lời chúc...</p></div></div>
+      </div>
+    </dialog>
 
     <dialog class="admin-dialog" id="adminDialog">
       <button class="dialog-close" type="button" aria-label="Đóng">×</button>
