@@ -93,6 +93,19 @@ footer button:hover { color:#9abbd5; }
 .admin-dialog input { display:block; width:100%; margin-top:6px; padding:11px; border:1px solid #255579; border-radius:6px; outline:none; color:white; background:#041426; font:inherit; }
 .admin-dialog input:focus { border-color:var(--cyan); }
 .admin-dialog .primary-button { justify-content:center; border:0; cursor:pointer; }
+.crop-dialog { width:min(760px,calc(100% - 28px)); padding:28px; border:1px solid #216c9f; border-radius:12px; color:#dceeff; background:#071d35; box-shadow:0 30px 100px rgba(0,0,0,.65); }
+.crop-dialog::backdrop { background:rgba(1,9,18,.82); backdrop-filter:blur(8px); }
+.crop-dialog > p:first-of-type { margin:0 0 6px; color:var(--cyan); font:600 9px "Space Grotesk"; letter-spacing:.2em; }
+.crop-dialog h2 { margin:0 0 18px; color:white; font:700 26px "Space Grotesk"; }
+.crop-stage { display:grid; place-items:center; min-height:280px; padding:12px; overflow:hidden; border:1px solid #275b80; border-radius:8px; background:#031326; }
+.crop-stage canvas { display:block; width:auto; max-width:100%; max-height:58vh; border-radius:4px; cursor:grab; touch-action:none; box-shadow:0 14px 35px rgba(0,0,0,.35); }
+.crop-stage canvas:active { cursor:grabbing; }
+.crop-zoom { display:grid; grid-template-columns:auto 1fr; align-items:center; gap:18px; margin-top:18px; color:#9db6cb; font-size:11px; }
+.crop-zoom input { width:100%; accent-color:var(--cyan); }
+.crop-dialog .crop-hint { margin:10px 0 18px; color:#7693ab; font-size:10px; }
+.crop-actions { display:flex; justify-content:flex-end; gap:10px; }
+.crop-actions button { padding:10px 18px; border:1px solid #326588; border-radius:6px; color:white; background:#0b2b49; cursor:pointer; }
+.crop-actions .primary-button { border-color:#18bce7; color:#03172a; background:var(--cyan); font-weight:700; }
 .signed-in-panel p { color:#91abc2; font-size:12px; line-height:1.7; }
 .signed-in-panel button { padding:9px 12px; border:1px solid #326588; border-radius:6px; color:white; background:#0b2b49; cursor:pointer; }
 .upload-toast { position:fixed; z-index:100; left:50%; bottom:25px; padding:11px 16px; border:1px solid rgba(93,210,255,.4); border-radius:7px; color:white; background:rgba(4,35,65,.94); box-shadow:0 12px 40px rgba(0,0,0,.35); opacity:0; transform:translate(-50%,12px); transition:.25s; pointer-events:none; font-size:11px; }

@@ -29,12 +29,20 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg>
           Hành trình 4 năm
         </a>
-        <button class="download-button" id="downloadButton" type="button">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14" />
-          </svg>
-          <span>Tải thiệp PNG</span>
-        </button>
+        <div class="export-actions">
+          <button class="download-button poster-button" id="posterButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="5" y="3" width="14" height="18" rx="2" /><path d="m8 16 3-3 2 2 3-4 2 3" />
+            </svg>
+            <span>Tải poster</span>
+          </button>
+          <button class="download-button" id="downloadButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14" />
+            </svg>
+            <span>Tải thiệp PNG</span>
+          </button>
+        </div>
       </div>
 
       <article class="invitation" id="invitation">
@@ -106,25 +114,27 @@
             </g>
           </svg>
           <header>
+            <p class="poster-kicker">Class of 2026 · Graduation Day</p>
             <p class="eyebrow">You are invited to my</p>
             <h1>GRADUATION<br /><span>CEREMONY</span></h1>
             <div class="title-line"><span></span><i></i><span></span></div>
           </header>
 
           <div class="guest-name">
-            <span>Thân mời</span>
+            <span>Trân trọng kính mời</span>
             <input
               id="guestName"
               type="text"
               maxlength="50"
-              placeholder="Nhập tên người bạn muốn mời..."
+              placeholder="Nhập tên Thầy/Cô, Anh/Chị hoặc bạn..."
               aria-label="Tên người được mời"
             />
           </div>
 
           <p class="invitation-copy">
-            Một cột mốc đáng nhớ sẽ trọn vẹn hơn khi có bạn ở bên. Trân trọng mời bạn
-            đến chung vui và lưu lại những khoảnh khắc thật đẹp cùng mình!
+            Trên hành trình trưởng thành, mình may mắn nhận được sự đồng hành từ rất
+            nhiều người. Sự hiện diện của quý Thầy/Cô, Anh/Chị và các bạn trong ngày
+            đặc biệt này sẽ là niềm vui và vinh dự đối với mình.
           </p>
 
           <div class="date-lockup" aria-label="Ngày 22 tháng 8 năm 2026">
@@ -169,6 +179,20 @@
                 <path d="M15 10v16c0 4 9 7 20 7s20-3 20-7V10" />
                 <path d="M15 26v16c0 4 9 7 20 7s20-3 20-7V26" />
               </svg>
+            </div>
+          </div>
+
+          <div class="poster-details">
+            <div>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <span>Thời gian diễn ra buổi lễ</span>
+              <strong>07:30 — 11:30</strong>
+            </div>
+            <div>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              <span>Địa điểm tổ chức</span>
+              <strong>Trường Đại học Quản lý và Công nghệ Thành phố Hồ Chí Minh</strong>
+              <small>Số 2 Đường 60CL, Phường Cát Lái, Thành phố Hồ Chí Minh</small>
             </div>
           </div>
 

@@ -70,6 +70,19 @@ const signedInPanel = document.querySelector("#signedInPanel");
 const adminEmailInput = document.querySelector("#adminEmail");
 const logoutButton = document.querySelector("#logoutButton");
 const optimizeButton = document.querySelector("#optimizeButton");
+const cropDialog = document.querySelector("#cropDialog");
+const cropCanvas = document.querySelector("#cropCanvas");
+const cropZoom = document.querySelector("#cropZoom");
+const cropSave = document.querySelector("#cropSave");
+const cropCancel = document.querySelector("#cropCancel");
+const cropClose = document.querySelector("#cropClose");
+
+let cropBitmap = null;
+let cropOffsetX = 0;
+let cropOffsetY = 0;
+let cropDragging = false;
+let cropPointerX = 0;
+let cropPointerY = 0;
 
 const lazyPhotoObserver = new IntersectionObserver(
   (entries) => entries.forEach((entry) => {
@@ -157,6 +170,120 @@ async function optimizeImage(file) {
   return blob;
 }
 
+function cropMetrics() {
+  const baseScale = Math.max(
+    cropCanvas.width / cropBitmap.width,
+    cropCanvas.height / cropBitmap.height
+  );
+  const scale = baseScale * Number(cropZoom.value);
+  const width = cropBitmap.width * scale;
+  const height = cropBitmap.height * scale;
+  return { scale, width, height };
+}
+
+function clampCropOffset() {
+  const { width, height } = cropMetrics();
+  const maxX = Math.max(0, (width - cropCanvas.width) / 2);
+  const maxY = Math.max(0, (height - cropCanvas.height) / 2);
+  cropOffsetX = Math.max(-maxX, Math.min(maxX, cropOffsetX));
+  cropOffsetY = Math.max(-maxY, Math.min(maxY, cropOffsetY));
+}
+
+function drawCropPreview() {
+  if (!cropBitmap) return;
+  clampCropOffset();
+  const { width, height } = cropMetrics();
+  const context = cropCanvas.getContext("2d", { alpha: false });
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.fillStyle = "#061a34";
+  context.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+  context.drawImage(
+    cropBitmap,
+    (cropCanvas.width - width) / 2 + cropOffsetX,
+    (cropCanvas.height - height) / 2 + cropOffsetY,
+    width,
+    height
+  );
+}
+
+async function openCropEditor(file) {
+  if (cropBitmap) cropBitmap.close();
+  try {
+    cropBitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch (_) {
+    cropBitmap = await createImageBitmap(file);
+  }
+  const bounds = activePhoto.getBoundingClientRect();
+  const aspect = Math.max(0.35, Math.min(3, bounds.width / bounds.height));
+  if (aspect >= 1) {
+    cropCanvas.width = 960;
+    cropCanvas.height = Math.round(960 / aspect);
+  } else {
+    cropCanvas.height = 900;
+    cropCanvas.width = Math.round(900 * aspect);
+  }
+  cropZoom.value = "1";
+  cropOffsetX = 0;
+  cropOffsetY = 0;
+  drawCropPreview();
+  cropDialog.showModal();
+}
+
+function closeCropEditor() {
+  cropDialog.close();
+  if (cropBitmap) cropBitmap.close();
+  cropBitmap = null;
+  fileInput.value = "";
+}
+
+async function renderCroppedImage() {
+  const aspect = cropCanvas.width / cropCanvas.height;
+  const output = document.createElement("canvas");
+  if (aspect >= 1) {
+    output.width = 1920;
+    output.height = Math.round(1920 / aspect);
+  } else {
+    output.height = 1920;
+    output.width = Math.round(1920 * aspect);
+  }
+  const ratio = output.width / cropCanvas.width;
+  const { width, height } = cropMetrics();
+  const context = output.getContext("2d", { alpha: false });
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.fillStyle = "#061a34";
+  context.fillRect(0, 0, output.width, output.height);
+  context.drawImage(
+    cropBitmap,
+    ((cropCanvas.width - width) / 2 + cropOffsetX) * ratio,
+    ((cropCanvas.height - height) / 2 + cropOffsetY) * ratio,
+    width * ratio,
+    height * ratio
+  );
+  const blob = await new Promise((resolve) => output.toBlob(resolve, "image/webp", 0.84));
+  if (!blob) throw new Error("Không thể tạo ảnh đã canh chỉnh");
+  return blob;
+}
+
+async function uploadJourneyPhoto(imageBlob) {
+  const key = getPhotoKey(activePhoto);
+  if (cloudClient) {
+    const { error } = await cloudClient.storage.from("journey").upload(key, imageBlob, {
+      cacheControl: "31536000",
+      contentType: "image/webp",
+      upsert: true,
+    });
+    if (error) throw error;
+    const { data } = cloudClient.storage.from("journey").getPublicUrl(key);
+    displayPhoto(activePhoto, `${data.publicUrl}?v=${Date.now()}`);
+    activePhoto.dataset.cloudSize = String(imageBlob.size);
+  } else {
+    await savePhoto(key, imageBlob);
+    displayPhoto(activePhoto, imageBlob);
+  }
+}
+
 function updateAdminInterface() {
   const signedIn = Boolean(adminUser);
   loginForm.hidden = signedIn;
@@ -224,28 +351,57 @@ fileInput.addEventListener("change", async () => {
     return;
   }
   try {
-    const key = getPhotoKey(activePhoto);
-    showToast("Đang tối ưu ảnh...");
-    const optimizedFile = await optimizeImage(file);
-    if (cloudClient) {
-      const { error } = await cloudClient.storage.from("journey").upload(key, optimizedFile, {
-        cacheControl: "31536000",
-        contentType: "image/webp",
-        upsert: true,
-      });
-      if (error) throw error;
-      const { data } = cloudClient.storage.from("journey").getPublicUrl(key);
-      displayPhoto(activePhoto, `${data.publicUrl}?v=${Date.now()}`);
-      activePhoto.dataset.cloudSize = String(optimizedFile.size);
-      showToast(`Đã tối ưu và lưu ảnh (${Math.round(optimizedFile.size / 1024)} KB)!`);
-    } else {
-      await savePhoto(key, optimizedFile);
-      displayPhoto(activePhoto, optimizedFile);
-      showToast(`Đã tối ưu và lưu ảnh (${Math.round(optimizedFile.size / 1024)} KB)!`);
-    }
+    await openCropEditor(file);
+  } catch (error) {
+    console.error(error);
+    showToast("Không thể mở ảnh. Vui lòng thử lại.");
+  }
+});
+
+cropZoom.addEventListener("input", drawCropPreview);
+cropCanvas.addEventListener("pointerdown", (event) => {
+  cropDragging = true;
+  cropPointerX = event.clientX;
+  cropPointerY = event.clientY;
+  cropCanvas.setPointerCapture(event.pointerId);
+});
+cropCanvas.addEventListener("pointermove", (event) => {
+  if (!cropDragging) return;
+  const scaleX = cropCanvas.width / cropCanvas.getBoundingClientRect().width;
+  const scaleY = cropCanvas.height / cropCanvas.getBoundingClientRect().height;
+  cropOffsetX += (event.clientX - cropPointerX) * scaleX;
+  cropOffsetY += (event.clientY - cropPointerY) * scaleY;
+  cropPointerX = event.clientX;
+  cropPointerY = event.clientY;
+  drawCropPreview();
+});
+cropCanvas.addEventListener("pointerup", () => { cropDragging = false; });
+cropCanvas.addEventListener("pointercancel", () => { cropDragging = false; });
+cropCanvas.addEventListener("wheel", (event) => {
+  event.preventDefault();
+  const nextZoom = Math.max(1, Math.min(3, Number(cropZoom.value) - event.deltaY * 0.0015));
+  cropZoom.value = String(nextZoom);
+  drawCropPreview();
+}, { passive: false });
+
+cropCancel.addEventListener("click", closeCropEditor);
+cropClose.addEventListener("click", closeCropEditor);
+cropSave.addEventListener("click", async () => {
+  if (!cropBitmap || !activePhoto) return;
+  cropSave.disabled = true;
+  cropSave.textContent = "Đang lưu...";
+  try {
+    const croppedImage = await renderCroppedImage();
+    await uploadJourneyPhoto(croppedImage);
+    const size = Math.round(croppedImage.size / 1024);
+    closeCropEditor();
+    showToast(`Đã canh chỉnh và lưu ảnh (${size} KB)!`);
   } catch (error) {
     console.error(error);
     showToast("Không thể lưu ảnh. Vui lòng thử lại.");
+  } finally {
+    cropSave.disabled = false;
+    cropSave.textContent = "Lưu ảnh";
   }
 });
 

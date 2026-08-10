@@ -1,6 +1,7 @@
 const photoInput = document.querySelector("#photoInput");
 const portraitImage = document.querySelector("#portraitImage");
 const downloadButton = document.querySelector("#downloadButton");
+const posterButton = document.querySelector("#posterButton");
 const invitation = document.querySelector("#invitation");
 const toast = document.querySelector("#toast");
 const guestName = document.querySelector("#guestName");
@@ -37,15 +38,19 @@ guestName.addEventListener("input", () => {
     : "";
 });
 
-downloadButton.addEventListener("click", async () => {
+async function exportArtwork({ poster = false } = {}) {
   if (typeof html2canvas === "undefined") {
     showToast("Không thể tải công cụ xuất ảnh. Hãy kiểm tra kết nối mạng.");
     return;
   }
 
   downloadButton.disabled = true;
-  downloadButton.querySelector("span").textContent = "Đang tạo ảnh...";
+  posterButton.disabled = true;
+  const activeButton = poster ? posterButton : downloadButton;
+  const originalLabel = activeButton.querySelector("span").textContent;
+  activeButton.querySelector("span").textContent = "Đang tạo ảnh...";
   invitation.classList.add("exporting");
+  invitation.classList.toggle("poster-export", poster);
 
   try {
     await document.fonts.ready;
@@ -79,7 +84,7 @@ downloadButton.addEventListener("click", async () => {
         }
 
         const clonedInput = clonedDocument.querySelector("#guestName");
-        if (clonedInput && guestName.value.trim()) {
+        if (!poster && clonedInput && guestName.value.trim()) {
           const nameText = clonedDocument.createElement("span");
           nameText.className = "guest-name-export";
           nameText.textContent = guestName.value.trim();
@@ -91,16 +96,23 @@ downloadButton.addEventListener("click", async () => {
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = "high";
     const link = document.createElement("a");
-    link.download = "thiep-moi-tot-nghiep-22-08-2026.png";
+    link.download = poster
+      ? "poster-le-tot-nghiep-22-08-2026.png"
+      : "thiep-moi-tot-nghiep-22-08-2026.png";
     link.href = canvas.toDataURL("image/png", 1);
     link.click();
-    showToast("Thiệp đã được tải xuống!");
+    showToast(poster ? "Poster đã được tải xuống!" : "Thiệp đã được tải xuống!");
   } catch (error) {
     console.error(error);
     showToast("Có lỗi khi tạo ảnh. Vui lòng thử lại.");
   } finally {
     invitation.classList.remove("exporting");
+    invitation.classList.remove("poster-export");
     downloadButton.disabled = false;
-    downloadButton.querySelector("span").textContent = "Tải thiệp PNG";
+    posterButton.disabled = false;
+    activeButton.querySelector("span").textContent = originalLabel;
   }
-});
+}
+
+downloadButton.addEventListener("click", () => exportArtwork());
+posterButton.addEventListener("click", () => exportArtwork({ poster: true }));
