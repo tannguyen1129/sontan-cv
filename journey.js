@@ -1,7 +1,7 @@
 const config = window.JOURNEY_CONFIG || {};
 const toast = document.querySelector("#toast");
 const heroPhoto = document.querySelector("#heroPhoto");
-const heroPhotoIndex = document.querySelector("#heroPhotoIndex");
+const heroPhotoTrack = document.querySelector("#heroPhotoTrack");
 const photoGrid = document.querySelector("#photoGrid");
 const wishGrid = document.querySelector("#wishGrid");
 const wishForm = document.querySelector("#wishForm");
@@ -47,11 +47,14 @@ function photoUrl(name, version = "") {
   return `${data.publicUrl}${version ? `?v=${encodeURIComponent(version)}` : ""}`;
 }
 
-function setHeroPhoto(photo) {
-  if (!photo) return;
-  heroPhoto.style.backgroundImage = `url("${photo.url}")`;
+function renderHeroMarquee() {
+  if (!photos.length) return;
+  const selection = shuffle(photos).slice(0, Math.min(8, photos.length));
+  const loop = [...selection, ...selection];
+  heroPhotoTrack.innerHTML = loop.map((photo, index) => `<div class="hero-slide" style="background-image:url('${photo.url.replace(/'/g, "%27")}')"><span>${String((index % selection.length) + 1).padStart(2, "0")}</span></div>`).join("");
+  heroPhotoTrack.style.setProperty("--slide-count", selection.length);
+  heroPhotoTrack.style.setProperty("--marquee-duration", `${Math.max(20, selection.length * 5)}s`);
   heroPhoto.classList.add("has-image");
-  heroPhotoIndex.textContent = `RANDOM / ${String(photos.indexOf(photo) + 1).padStart(2, "0")}`;
 }
 
 function renderRandomPhotos() {
@@ -61,7 +64,7 @@ function renderRandomPhotos() {
   }
   const selection = shuffle(photos).slice(0, Math.min(5, photos.length));
   photoGrid.innerHTML = selection.map((photo, index) => `<article class="memory-card" style="background-image:url('${photo.url.replace(/'/g, "%27")}')"><span>MEMORY / ${String(index + 1).padStart(2, "0")}</span></article>`).join("");
-  setHeroPhoto(shuffle(photos)[0]);
+  renderHeroMarquee();
 }
 
 function renderRandomWishes() {
@@ -69,7 +72,8 @@ function renderRandomWishes() {
     wishGrid.innerHTML = '<p class="empty-state">Chưa có lời chúc nào. Bạn sẽ là người đầu tiên chứ?</p>';
     return;
   }
-  const selection = shuffle(wishes).slice(0, Math.min(6, wishes.length));
+  const amount = Math.min(wishes.length, 2 + Math.floor(Math.random() * 2));
+  const selection = shuffle(wishes).slice(0, amount);
   wishGrid.innerHTML = selection.map((wish) => {
     const date = new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(wish.created_at));
     return `<article class="wish-card"><p>${escapeHtml(wish.message)}</p><footer>${escapeHtml(wish.name)}<time>${date}</time></footer></article>`;
@@ -159,7 +163,6 @@ async function initialize() {
   results.forEach((result) => { if (result.status === "rejected") console.error(result.reason); });
 }
 
-document.querySelector("#shufflePhoto").addEventListener("click", () => setHeroPhoto(shuffle(photos)[0]));
 document.querySelector("#shuffleGallery").addEventListener("click", renderRandomPhotos);
 document.querySelector("#shuffleWishes").addEventListener("click", renderRandomWishes);
 wishMessage.addEventListener("input", () => { messageCount.textContent = wishMessage.value.length; });
@@ -274,6 +277,10 @@ adminWishList.addEventListener("click", async (event) => {
 });
 
 initialize();
+
+window.setInterval(() => {
+  if (!document.hidden && wishes.length) renderRandomWishes();
+}, 8000);
 
 if (location.hash === "#wishes") document.querySelector("#wishDialog").showModal();
 if (location.hash === "#moments") document.querySelector("#galleryDialog").showModal();
