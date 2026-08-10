@@ -3,8 +3,8 @@ const toast = document.querySelector("#toast");
 const heroPhoto = document.querySelector("#heroPhoto");
 const heroPhotoTrackOne = document.querySelector("#heroPhotoTrackOne");
 const heroPhotoTrackTwo = document.querySelector("#heroPhotoTrackTwo");
-const photoGrid = document.querySelector("#photoGrid");
 const wishGrid = document.querySelector("#wishGrid");
+const heroWishGrid = document.querySelector("#heroWishGrid");
 const wishForm = document.querySelector("#wishForm");
 const wishMessage = document.querySelector("#wishMessage");
 const messageCount = document.querySelector("#messageCount");
@@ -65,17 +65,15 @@ function renderHeroMarquee() {
 
 function renderRandomPhotos() {
   if (!photos.length) {
-    photoGrid.innerHTML = Array.from({ length: 5 }, () => '<div class="memory-card empty-photo">THÊM ẢNH TỪ TRANG QUẢN TRỊ</div>').join("");
     return;
   }
-  const selection = shuffle(photos).slice(0, Math.min(5, photos.length));
-  photoGrid.innerHTML = selection.map((photo, index) => `<article class="memory-card" style="background-image:url('${photo.url.replace(/'/g, "%27")}')"><span>MEMORY / ${String(index + 1).padStart(2, "0")}</span></article>`).join("");
   renderHeroMarquee();
 }
 
 function renderRandomWishes() {
   if (!wishes.length) {
     wishGrid.innerHTML = '<p class="empty-state">Chưa có lời chúc nào. Bạn sẽ là người đầu tiên chứ?</p>';
+    heroWishGrid.innerHTML = '<small>Chưa có lời chúc nào — gửi lời đầu tiên nha.</small>';
     return;
   }
   const amount = Math.min(wishes.length, 2 + Math.floor(Math.random() * 2));
@@ -84,6 +82,7 @@ function renderRandomWishes() {
     const date = new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(wish.created_at));
     return `<article class="wish-card"><p>${escapeHtml(wish.message)}</p><footer>${escapeHtml(wish.name)}<time>${date}</time></footer></article>`;
   }).join("");
+  heroWishGrid.innerHTML = selection.map((wish) => `<article><p>“${escapeHtml(wish.message)}”</p><strong>${escapeHtml(wish.name)}</strong></article>`).join("");
 }
 
 async function loadPhotos() {
@@ -169,7 +168,6 @@ async function initialize() {
   results.forEach((result) => { if (result.status === "rejected") console.error(result.reason); });
 }
 
-document.querySelector("#shuffleGallery").addEventListener("click", renderRandomPhotos);
 document.querySelector("#shuffleWishes").addEventListener("click", renderRandomWishes);
 wishMessage.addEventListener("input", () => { messageCount.textContent = wishMessage.value.length; });
 
@@ -289,4 +287,3 @@ window.setInterval(() => {
 }, 8000);
 
 if (location.hash === "#wishes") document.querySelector("#wishDialog").showModal();
-if (location.hash === "#moments") document.querySelector("#galleryDialog").showModal();

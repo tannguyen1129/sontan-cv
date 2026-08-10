@@ -19,7 +19,7 @@
         <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="8" width="24" height="24" rx="5"/><path d="M14 1v7m6-7v7m6-7v7M14 32v7m6-7v7m6-7v7M1 14h7m-7 6h7m-7 6h7m24-12h7m-7 6h7m-7 6h7M15 20h10M20 15v10"/></svg>
         <span>SON TAN<small>GRADUATION · 2026</small></span>
       </a>
-      <nav aria-label="Điều hướng chính"><button data-open="galleryDialog" type="button">Khoảnh khắc</button><button data-open="wishDialog" type="button">Lời chúc</button></nav>
+      <nav aria-label="Điều hướng chính"><button data-open="wishDialog" type="button">Gửi lời chúc</button></nav>
     </header>
 
     <main id="top">
@@ -29,13 +29,14 @@
           <p class="kicker"><i></i> 22 · 08 · 2026</p>
           <h1>MỘT CHƯƠNG<br /><span>VỪA KHÉP LẠI.</span></h1>
           <p class="hero-lead">Bốn năm đại học được giữ lại bằng những tấm hình, những người đã gặp và những lời chúc dành cho hành trình tiếp theo.</p>
-          <div class="hero-actions"><button class="primary-button" data-open="wishDialog" type="button">Gửi lời chúc <span>↘</span></button><button class="plain-link" data-open="galleryDialog" type="button">Xem khoảnh khắc</button></div>
+          <div class="hero-actions"><button class="primary-button" data-open="wishDialog" type="button">Gửi lời chúc <span>↘</span></button></div>
+          <div class="hero-wishes"><div class="hero-wish-head"><span>LỜI CHÚC VỪA GHÉ QUA</span><i></i></div><div class="hero-wish-grid" id="heroWishGrid"><small>Đang đón những lời chúc đầu tiên...</small></div></div>
         </div>
         <div class="hero-photo photo-wall" id="heroPhoto">
           <div class="photo-marquee photo-row-one"><div class="photo-track" id="heroPhotoTrackOne"></div></div>
           <div class="photo-marquee photo-row-two"><div class="photo-track" id="heroPhotoTrackTwo"></div></div>
           <div class="photo-placeholder"><span>PHOTO STREAM</span><small>Ảnh từ thư viện sẽ xuất hiện tại đây</small></div>
-          <div class="photo-caption"><span>MEMORIES ON LOOP</span><small>Hai dòng ký ức · không điểm dừng</small></div>
+          <div class="photo-caption"><span>MEMORIES ON LOOP</span></div>
         </div>
         <div class="hero-code" aria-hidden="true">0101<br />2026<br />GRAD</div>
       </section>
@@ -51,13 +52,6 @@
 
     <footer><p>Sơn Tân © 2026</p><button id="adminButton" type="button">Quản trị</button><a href="#top">Lên đầu trang ↑</a></footer>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    <dialog class="content-dialog gallery-dialog" id="galleryDialog">
-      <button class="dialog-close" type="button" aria-label="Đóng">×</button>
-      <div class="dialog-heading"><p>RANDOM MEMORIES</p><h2>Mỗi lần mở,<br /><span>một ký ức khác.</span></h2></div>
-      <div class="photo-grid" id="photoGrid" aria-live="polite"></div>
-      <button class="secondary-button" id="shuffleGallery" type="button">Xáo trộn thư viện ↻</button>
-    </dialog>
 
     <dialog class="content-dialog wish-dialog" id="wishDialog">
       <button class="dialog-close" type="button" aria-label="Đóng">×</button>
@@ -79,10 +73,12 @@
       <p>PRIVATE CONTROL PANEL</p><h2>Quản trị nội dung</h2>
       <form id="loginForm"><label>Email<input id="adminEmail" type="email" autocomplete="username" required /></label><label>Mật khẩu<input id="adminPassword" type="password" autocomplete="current-password" required /></label><button class="primary-button" type="submit">Đăng nhập</button></form>
       <div id="adminPanel" hidden>
-        <div class="admin-actions"><label class="upload-button">+ Thêm ảnh<input id="libraryInput" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple hidden /></label><button id="optimizeLibrary" type="button">Tối ưu ảnh lớn</button><button id="logoutButton" type="button">Đăng xuất</button></div>
-        <p class="admin-note">Ảnh mới được tự động tối ưu WebP. Chạm dấu × trên ảnh hoặc lời chúc để xóa.</p>
-        <h3>Thư viện ảnh <span id="photoCount">0</span></h3><div class="admin-photo-grid" id="adminPhotoGrid"></div>
-        <h3>Lời chúc <span id="wishCount">0</span></h3><div class="admin-wish-list" id="adminWishList"></div>
+        <div class="admin-toolbar"><div><strong>Content Library</strong><span>Quản lý nội dung đang xuất hiện trên website</span></div><button id="logoutButton" type="button">Đăng xuất</button></div>
+        <div class="admin-actions"><label class="upload-button">+ Thêm ảnh<input id="libraryInput" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple hidden /></label><button id="optimizeLibrary" type="button">Tối ưu ảnh lớn</button><p class="admin-note">Ảnh mới tự chuyển sang WebP và được đưa vào hai dải ảnh ngẫu nhiên.</p></div>
+        <div class="admin-columns">
+          <section><div class="admin-section-head"><h3>Thư viện ảnh</h3><span id="photoCount">0</span></div><div class="admin-photo-grid" id="adminPhotoGrid"></div></section>
+          <section><div class="admin-section-head"><h3>Lời chúc</h3><span id="wishCount">0</span></div><div class="admin-wish-list" id="adminWishList"></div></section>
+        </div>
       </div>
     </dialog>
 
