@@ -69,6 +69,17 @@ const loginForm = document.querySelector("#loginForm");
 const signedInPanel = document.querySelector("#signedInPanel");
 const adminEmailInput = document.querySelector("#adminEmail");
 const logoutButton = document.querySelector("#logoutButton");
+const optimizeButton = document.querySelector("#optimizeButton");
+
+const lazyPhotoObserver = new IntersectionObserver(
+  (entries) => entries.forEach((entry) => {
+    if (!entry.isIntersecting || !entry.target.dataset.lazySrc) return;
+    displayPhoto(entry.target, entry.target.dataset.lazySrc);
+    delete entry.target.dataset.lazySrc;
+    lazyPhotoObserver.unobserve(entry.target);
+  }),
+  { rootMargin: "600px 0px" }
+);
 
 function showToast(message) {
   toast.textContent = message;
@@ -120,6 +131,32 @@ function displayPhoto(photo, source) {
   photo.classList.add("has-image");
 }
 
+function queueCloudPhoto(photo, source) {
+  photo.dataset.lazySrc = source;
+  lazyPhotoObserver.observe(photo);
+}
+
+async function optimizeImage(file) {
+  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  const maxDimension = 1920;
+  const ratio = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * ratio));
+  const height = Math.max(1, Math.round(bitmap.height * ratio));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d", { alpha: false });
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.fillStyle = "#061a34";
+  context.fillRect(0, 0, width, height);
+  context.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", 0.82));
+  if (!blob) throw new Error("Không thể tối ưu ảnh");
+  return blob;
+}
+
 function updateAdminInterface() {
   const signedIn = Boolean(adminUser);
   loginForm.hidden = signedIn;
@@ -151,8 +188,10 @@ async function restoreCloudPhotos() {
   photos.forEach((photo) => {
     const key = getPhotoKey(photo);
     if (!available.has(key)) return;
+    const object = data.find((item) => item.name === key);
+    photo.dataset.cloudSize = String(object?.metadata?.size || 0);
     const { data: publicData } = cloudClient.storage.from("journey").getPublicUrl(key);
-    displayPhoto(photo, `${publicData.publicUrl}?v=${Date.now()}`);
+    queueCloudPhoto(photo, `${publicData.publicUrl}?v=${object?.updated_at || Date.now()}`);
   });
 }
 
@@ -186,20 +225,23 @@ fileInput.addEventListener("change", async () => {
   }
   try {
     const key = getPhotoKey(activePhoto);
+    showToast("Đang tối ưu ảnh...");
+    const optimizedFile = await optimizeImage(file);
     if (cloudClient) {
-      const { error } = await cloudClient.storage.from("journey").upload(key, file, {
-        cacheControl: "3600",
-        contentType: file.type,
+      const { error } = await cloudClient.storage.from("journey").upload(key, optimizedFile, {
+        cacheControl: "31536000",
+        contentType: "image/webp",
         upsert: true,
       });
       if (error) throw error;
       const { data } = cloudClient.storage.from("journey").getPublicUrl(key);
       displayPhoto(activePhoto, `${data.publicUrl}?v=${Date.now()}`);
-      showToast("Đã lưu ảnh trực tuyến!");
+      activePhoto.dataset.cloudSize = String(optimizedFile.size);
+      showToast(`Đã tối ưu và lưu ảnh (${Math.round(optimizedFile.size / 1024)} KB)!`);
     } else {
-      await savePhoto(key, file);
-      displayPhoto(activePhoto, file);
-      showToast("Đã lưu ảnh trên thiết bị này!");
+      await savePhoto(key, optimizedFile);
+      displayPhoto(activePhoto, optimizedFile);
+      showToast(`Đã tối ưu và lưu ảnh (${Math.round(optimizedFile.size / 1024)} KB)!`);
     }
   } catch (error) {
     console.error(error);
@@ -248,6 +290,42 @@ logoutButton.addEventListener("click", async () => {
   if (cloudClient) await cloudClient.auth.signOut();
   adminDialog.close();
   showToast("Đã đăng xuất.");
+});
+
+optimizeButton.addEventListener("click", async () => {
+  if (!cloudClient || !adminUser) return;
+  const candidates = photos.filter((photo) => Number(photo.dataset.cloudSize) > 1_500_000);
+  if (!candidates.length) {
+    showToast("Không còn ảnh lớn cần tối ưu.");
+    return;
+  }
+
+  optimizeButton.disabled = true;
+  try {
+    for (let index = 0; index < candidates.length; index += 1) {
+      const photo = candidates[index];
+      const key = getPhotoKey(photo);
+      showToast(`Đang tối ưu ảnh ${index + 1}/${candidates.length}...`);
+      const { data: publicData } = cloudClient.storage.from("journey").getPublicUrl(key);
+      const response = await fetch(`${publicData.publicUrl}?download=${Date.now()}`);
+      if (!response.ok) throw new Error(`Không tải được ${key}`);
+      const optimizedFile = await optimizeImage(await response.blob());
+      const { error } = await cloudClient.storage.from("journey").upload(key, optimizedFile, {
+        cacheControl: "31536000",
+        contentType: "image/webp",
+        upsert: true,
+      });
+      if (error) throw error;
+      photo.dataset.cloudSize = String(optimizedFile.size);
+      displayPhoto(photo, `${publicData.publicUrl}?v=${Date.now()}`);
+    }
+    showToast(`Đã tối ưu ${candidates.length} ảnh lớn!`);
+  } catch (error) {
+    console.error(error);
+    showToast("Có lỗi khi tối ưu ảnh. Bạn có thể thử lại.");
+  } finally {
+    optimizeButton.disabled = false;
+  }
 });
 
 async function startGallery() {
