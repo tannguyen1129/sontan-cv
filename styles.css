@@ -256,7 +256,7 @@ h1 {
   letter-spacing: -.035em;
   overflow: visible;
 }
-h1 span { color: transparent; -webkit-text-stroke: 1.5px var(--blue); }
+h1 span { display:inline-block; color:transparent; -webkit-text-stroke:1.5px var(--blue); transform:translateX(-14px); }
 
 .title-line { display: flex; align-items: center; gap: 10px; width: 64%; margin: 18px 0 20px; }
 .title-line span { height: 1px; flex: 1; background: #8bb9e6; }
@@ -311,7 +311,7 @@ h1 span { color: transparent; -webkit-text-stroke: 1.5px var(--blue); }
   letter-spacing: .01em;
 }
 
-.invitation-copy { max-width: 570px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
+.invitation-copy { width:100%; max-width:none; margin:0; color:var(--muted); font-size:13px; line-height:1.75; text-align:justify; text-align-last:left; }
 
 .date-lockup {
   display: grid;
@@ -476,6 +476,7 @@ h1 span { color: transparent; -webkit-text-stroke: 1.5px var(--blue); }
   .brand-mark { font-size: 9px; }
   .graduate-label strong { font-size: 28px; }
   .content-panel { min-height: 650px; padding: 42px 27px 28px; }
+  h1 span { transform:translateX(-6px); }
   h1 { font-size: 42px; }
   .invitation-copy { font-size: 12px; }
   .guest-name { align-items: flex-start; flex-direction: column; gap: 2px; }
