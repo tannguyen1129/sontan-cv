@@ -21,6 +21,23 @@ Sau đó truy cập `http://localhost:8080`.
 
 Nút **Quản lý ảnh** ở footer cho phép tài khoản quản trị đăng nhập và thay ảnh. Khách truy cập chỉ có quyền xem.
 
+## Kiểm thử VnCDN purge API
+
+Runner được khóa cứng và chỉ thao tác trên `graduation.sontan.info`, trong vùng `/cdn-test/`.
+Thêm `VNCDN_API_KEY` vào `.env`, sau đó chạy từng boundary test:
+
+```bash
+node cdn-api-test.js url 1
+node cdn-api-test.js url 10
+node cdn-api-test.js url 50
+node cdn-api-test.js url 100
+node cdn-api-test.js prefix 100
+node cdn-api-test.js prefix 500
+node cdn-api-test.js prefix 1000
+```
+
+Hoặc chạy toàn bộ bằng `node cdn-api-test.js all`. Script không hiển thị API key trong log.
+
 ## Thay ảnh mặc định
 
 - Cách nhanh: nhấn **Thay ảnh** ngay trên website. Ảnh chỉ được xử lý trong trình duyệt.
