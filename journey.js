@@ -7,6 +7,7 @@ const wishGrid = document.querySelector("#wishGrid");
 const heroWishGrid = document.querySelector("#heroWishGrid");
 const wishForm = document.querySelector("#wishForm");
 const wishMessage = document.querySelector("#wishMessage");
+const wishStatus = document.querySelector("#wishStatus");
 const messageCount = document.querySelector("#messageCount");
 const adminDialog = document.querySelector("#adminDialog");
 const loginForm = document.querySelector("#loginForm");
@@ -26,6 +27,18 @@ function showToast(message) {
   toast.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+}
+
+function showWishStatus(message, type = "error") {
+  wishStatus.textContent = message;
+  wishStatus.className = `form-status ${type}`;
+  wishStatus.hidden = false;
+}
+
+function clearWishStatus() {
+  wishStatus.hidden = true;
+  wishStatus.textContent = "";
+  wishStatus.className = "form-status";
 }
 
 function escapeHtml(value = "") {
@@ -104,6 +117,7 @@ async function loadWishes() {
   if (error) {
     console.warn("Wish table is not ready:", error.message);
     wishGrid.innerHTML = '<p class="empty-state">Sổ lời chúc đang được chuẩn bị.</p>';
+    heroWishGrid.innerHTML = '<small>Sổ lời chúc chưa được kích hoạt.</small>';
     return;
   }
   wishes = data || [];
@@ -186,27 +200,36 @@ document.querySelectorAll(".content-dialog").forEach((dialog) => {
 
 wishForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!client) return showToast("Sổ lời chúc chưa sẵn sàng.");
+  clearWishStatus();
+  if (!client) return showWishStatus("Sổ lời chúc chưa sẵn sàng. Vui lòng thử lại sau.");
   if (wishForm.elements.website.value) return;
   const lastSent = Number(localStorage.getItem("graduation-wish-sent") || 0);
-  if (Date.now() - lastSent < 30_000) return showToast("Chờ một chút trước khi gửi thêm lời chúc nha.");
+  if (Date.now() - lastSent < 30_000) return showWishStatus("Chờ một chút trước khi gửi thêm lời chúc nha.");
   const name = document.querySelector("#wishName").value.trim();
   const message = wishMessage.value.trim();
-  if (name.length < 2 || message.length < 3) return showToast("Bạn viết thêm một chút nữa nha.");
+  if (name.length < 2 || message.length < 3) return showWishStatus("Bạn viết thêm một chút nữa nha.");
   const button = wishForm.querySelector("button[type=submit]");
   button.disabled = true;
   button.textContent = "Đang gửi...";
-  const { data, error } = await client.from("graduation_wishes").insert({ name, message }).select("id,name,message,created_at").single();
-  button.disabled = false;
-  button.innerHTML = "Gửi lời chúc <span>→</span>";
-  if (error) { console.error(error); return showToast("Chưa gửi được lời chúc. Hãy thử lại nha."); }
-  localStorage.setItem("graduation-wish-sent", String(Date.now()));
-  wishes.unshift(data);
-  wishForm.reset();
-  messageCount.textContent = "0";
-  renderRandomWishes();
-  renderAdminWishes();
-  showToast("Lời chúc của bạn đã được lưu lại 💙");
+  try {
+    const { data, error } = await client.from("graduation_wishes").insert({ name, message }).select("id,name,message,created_at").single();
+    if (error) throw error;
+    localStorage.setItem("graduation-wish-sent", String(Date.now()));
+    wishes.unshift(data);
+    wishForm.reset();
+    messageCount.textContent = "0";
+    renderRandomWishes();
+    renderAdminWishes();
+    document.querySelector("#wishDialog").close();
+    showToast("Lời chúc của bạn đã được lưu lại 💙");
+  } catch (error) {
+    console.error("Could not submit wish:", error);
+    const missingTable = error?.code === "PGRST205" || /graduation_wishes|schema cache/i.test(error?.message || "");
+    showWishStatus(missingTable ? "Sổ lời chúc chưa được kích hoạt trên hệ thống." : "Chưa gửi được lời chúc. Kiểm tra mạng và thử lại nha.");
+  } finally {
+    button.disabled = false;
+    button.innerHTML = "Gửi lời chúc <span>→</span>";
+  }
 });
 
 document.querySelector("#adminButton").addEventListener("click", () => adminDialog.showModal());

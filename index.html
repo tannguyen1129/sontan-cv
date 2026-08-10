@@ -61,6 +61,7 @@
           <label>Tên của bạn<input id="wishName" name="name" maxlength="60" autocomplete="name" placeholder="Bạn muốn mình nhớ bạn là ai?" required /></label>
           <label>Lời chúc<textarea id="wishMessage" name="message" maxlength="500" rows="5" placeholder="Viết lời chúc tại đây..." required></textarea></label>
           <input class="honeypot" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div class="form-status" id="wishStatus" role="status" aria-live="polite" hidden></div>
           <div class="form-footer"><small><span id="messageCount">0</span>/500 ký tự</small><button class="primary-button" type="submit">Gửi lời chúc <span>→</span></button></div>
         </form>
         <div class="wish-panel"><div class="stream-head"><p>RANDOM WISHES</p><button id="shuffleWishes" type="button">Đổi lời chúc ↻</button></div><div class="wish-grid" id="wishGrid" aria-live="polite"><p class="empty-state">Đang tải những lời chúc...</p></div></div>

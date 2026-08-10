@@ -47,3 +47,4 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.photo-track,.wish-card,.hero-wish-grid>article{animation:none!important}}
 @media(max-width:650px){.content-dialog,.admin-dialog{overflow:auto}}
 @media(hover:none){.hero-photo:hover .photo-track{animation-play-state:running}}
+.form-status{margin-top:14px;padding:10px 12px;border:1px solid rgba(255,113,126,.4);border-radius:5px;color:#ffd9dd;background:rgba(123,22,36,.28);font-size:9px;line-height:1.55}.form-status.success{border-color:rgba(57,217,255,.4);color:#c9f7ff;background:rgba(13,103,133,.25)}.form-status[hidden]{display:none}
