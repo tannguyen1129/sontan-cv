@@ -1,6 +1,6 @@
 # Thiệp mời Tốt nghiệp 2026
 
-Website hành trình bốn năm đại học và thiệp mời tốt nghiệp, responsive và có thể xuất thiệp thành ảnh PNG.
+Landing page tốt nghiệp tương tác: hiển thị ảnh ngẫu nhiên từ thư viện, nhận lời chúc và giữ thiệp mời ở một đường dẫn riêng.
 
 ## Xem trên máy
 
@@ -19,7 +19,9 @@ Sau đó truy cập `http://localhost:8080`.
 3. Chạy `node build-config.js` trước khi xem trên máy.
 4. Khi deploy Blueprint, nhập `SUPABASE_URL` và `SUPABASE_ANON_KEY` trong Render.
 
-Nút **Quản lý ảnh** ở footer cho phép tài khoản quản trị đăng nhập và thay ảnh. Khách truy cập chỉ có quyền xem.
+Nút **Quản trị** ở footer cho phép tài khoản quản trị thêm/xóa ảnh và xóa lời chúc. Khách truy cập có thể xem ảnh, xem lời chúc và gửi lời chúc mới.
+
+Sau khi cập nhật phiên bản có sổ lời chúc, hãy chạy lại toàn bộ `supabase-setup.sql` trong SQL Editor một lần để tạo bảng và các chính sách RLS cần thiết.
 
 ## Kiểm thử VnCDN purge API
 
