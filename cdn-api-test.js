@@ -99,13 +99,25 @@ function askTerminal(message) {
 
 async function warm(paths) {
   // Warm through the public CDN because this provider currently returns 405 for /warm.
-  const fetchOne = async (path) => {
+  const warmPass = async (pass) => {
+    let completed = 0;
+    const startedAt = Date.now();
+    console.log(`Warm lượt ${pass}/2: bắt đầu ${paths.length} object...`);
+    await mapConcurrent(paths, concurrency, async (path) => {
     const response = await fetch(`${baseUrl}${path}`);
     await response.arrayBuffer();
     if (!response.ok) throw new Error(`Warm lỗi HTTP ${response.status}: ${path}`);
+      completed += 1;
+      const step = paths.length >= 1000 ? 500 : Math.max(1, Math.ceil(paths.length / 10));
+      if (completed % step === 0 || completed === paths.length) {
+        console.log(
+          `  lượt ${pass}: ${completed}/${paths.length} (${Math.round((completed / paths.length) * 100)}%) — ${Date.now() - startedAt}ms`
+        );
+      }
+    });
   };
-  await mapConcurrent(paths, concurrency, fetchOne);
-  await mapConcurrent(paths, concurrency, fetchOne);
+  await warmPass(1);
+  await warmPass(2);
 }
 
 async function purgeUrls(paths) {
@@ -130,7 +142,20 @@ async function mapConcurrent(items, concurrency, worker) {
 }
 
 async function inspect(paths, label) {
-  const states = await mapConcurrent(paths, concurrency, inspectPath);
+  let completed = 0;
+  const startedAt = Date.now();
+  console.log(`${label}: đang kiểm tra ${paths.length} object...`);
+  const states = await mapConcurrent(paths, concurrency, async (path) => {
+    const state = await inspectPath(path);
+    completed += 1;
+    const step = paths.length >= 1000 ? 500 : Math.max(1, Math.ceil(paths.length / 10));
+    if (completed % step === 0 || completed === paths.length) {
+      console.log(
+        `  kiểm tra: ${completed}/${paths.length} (${Math.round((completed / paths.length) * 100)}%) — ${Date.now() - startedAt}ms`
+      );
+    }
+    return state;
+  });
   const summary = states.reduce(
     (result, state) => ({ ...result, [state]: result[state] + 1 }),
     { HIT: 0, MISS: 0, UNKNOWN: 0 }
