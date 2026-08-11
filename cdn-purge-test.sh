@@ -6,8 +6,8 @@ action="${1:-help}"
 amount="${2:-}"
 
 validate_amount() {
-  if [[ ! "${amount}" =~ ^[0-9]+$ ]] || (( amount < 1 || amount > 1000 )); then
-    echo "Số lượng phải nằm trong khoảng 1-1000." >&2
+  if [[ ! "${amount}" =~ ^[0-9]+$ ]] || (( amount < 1 || amount > 10000 )); then
+    echo "Số lượng phải nằm trong khoảng 1-10000." >&2
     exit 1
   fi
 }
@@ -15,7 +15,7 @@ validate_amount() {
 url_for() {
   local group="$1"
   local index="$2"
-  printf '%s/cdn-test/%s/object-%04d.svg' "${base_url}" "${group}" "${index}"
+  printf '%s/cdn-test/%s/object-%05d.svg' "${base_url}" "${group}" "${index}"
 }
 
 generate_urls() {
@@ -42,22 +42,24 @@ warm_urls() {
 inspect_group() {
   local group="$1"
   local count="$2"
-  local hit=0
-  local miss=0
-  local unknown=0
-  local index headers cache_state age
-  for ((index=1; index<=count; index++)); do
-    headers=$(curl -fsS -D - --max-time 20 -o /dev/null "$(url_for "${group}" "${index}")" | tr -d '\r')
-    cache_state=$(printf '%s\n' "${headers}" | awk -F': ' 'tolower($1)=="x-cache"{print toupper($2); exit}')
-    age=$(printf '%s\n' "${headers}" | awk -F': ' 'tolower($1)=="age"{print $2; exit}')
-    if [[ "${cache_state}" == *HIT* ]] || [[ "${age:-}" =~ ^[1-9][0-9]*$ ]]; then
-      ((hit+=1))
-    elif [[ "${cache_state}" == *MISS* ]] || [[ "${age:-0}" == "0" ]]; then
-      ((miss+=1))
-    else
-      ((unknown+=1))
-    fi
-  done
+  local work_dir result_file
+  work_dir=$(mktemp -d)
+  result_file="${work_dir}/states"
+  export base_url group result_file
+  export -f url_for
+  seq 1 "${count}" | xargs -P "${CDN_TEST_CONCURRENCY:-40}" -I {} bash -c '
+    headers=$(curl -fsS -D - --max-time 20 -o /dev/null "$(url_for "$group" "{}")" | tr -d "\r") || { echo UNKNOWN >> "$result_file"; exit; }
+    cache_state=$(printf "%s\n" "$headers" | awk -F": " '\''tolower($1)=="x-cache"{print toupper($2); exit}'\'')
+    age=$(printf "%s\n" "$headers" | awk -F": " '\''tolower($1)=="age"{print $2; exit}'\'')
+    if [[ "$cache_state" == *HIT* ]] || [[ "${age:-}" =~ ^[1-9][0-9]*$ ]]; then echo HIT >> "$result_file"
+    elif [[ "$cache_state" == *MISS* ]] || [[ "${age:-0}" == 0 ]]; then echo MISS >> "$result_file"
+    else echo UNKNOWN >> "$result_file"; fi
+  '
+  local hit miss unknown
+  hit=$(awk '$0=="HIT"{n++} END{print n+0}' "${result_file}")
+  miss=$(awk '$0=="MISS"{n++} END{print n+0}' "${result_file}")
+  unknown=$(awk '$0=="UNKNOWN"{n++} END{print n+0}' "${result_file}")
+  rm -rf -- "${work_dir}"
   echo "Kết quả ${group}: HIT=${hit} MISS=${miss} UNKNOWN=${unknown} TOTAL=${count}"
 }
 
@@ -100,9 +102,13 @@ Theo folder/prefix:
   ./cdn-purge-test.sh prefix 500     # copy kết quả vào Purge By Prefix
   ./cdn-purge-test.sh check-folder 500
 
-Các mức cần thử:
-  URL:    1, 10, 50, 100
-  Folder: 100, 500, 1000
+Có thể thử mọi mức từ 1 đến 10000 object, ví dụ:
+  URL:    1, 10, 50, 100, 500, 1000, 5000, 10000
+  Folder: 100, 500, 1000, 5000, 10000
+
+Đo purge tự động bằng API và theo dõi đến khi MISS:
+  node cdn-api-test.js measure-url 100
+  node cdn-api-test.js measure-prefix 10000
 HELP
     ;;
 esac

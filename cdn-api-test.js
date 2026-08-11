@@ -23,6 +23,9 @@ const domain = "graduation.sontan.info";
 const baseUrl = `https://${domain}`;
 const apiBase = `https://console.vncdn.vn/apiv2/domains/${domain}`;
 const waitMs = Number(process.env.PURGE_WAIT_MS || 7000);
+const concurrency = Number(process.env.CDN_TEST_CONCURRENCY || 40);
+const measureTimeoutMs = Number(process.env.PURGE_MEASURE_TIMEOUT_MS || 120000);
+const pollIntervalMs = Number(process.env.PURGE_POLL_INTERVAL_MS || 500);
 const command = process.argv[2] || "help";
 const amount = Number(process.argv[3] || 0);
 
@@ -32,16 +35,16 @@ function requireApiKey() {
   }
 }
 
-function validateAmount(allowed) {
-  if (!allowed.includes(amount)) {
-    throw new Error(`Mức hợp lệ cho lệnh này: ${allowed.join(", ")}.`);
+function validateAmount() {
+  if (!Number.isInteger(amount) || amount < 1 || amount > 10000) {
+    throw new Error("Số lượng phải là số nguyên trong khoảng 1-10000.");
   }
 }
 
 function groupPaths(group, count) {
   return Array.from(
     { length: count },
-    (_, index) => `/cdn-test/${group}/object-${String(index + 1).padStart(4, "0")}.svg`
+    (_, index) => `/cdn-test/${group}/object-${String(index + 1).padStart(5, "0")}.svg`
   );
 }
 
@@ -78,11 +81,14 @@ async function apiRequest(endpoint, body) {
 }
 
 async function warm(paths) {
-  // Chunking keeps each warm request small; it does not affect the purge-limit test.
-  for (let offset = 0; offset < paths.length; offset += 100) {
-    const chunk = paths.slice(offset, offset + 100);
-    await apiRequest("warm", { urls: chunk, concurrency: 10, timeout_secs: 120 });
-  }
+  // Warm through the public CDN because this provider currently returns 405 for /warm.
+  const fetchOne = async (path) => {
+    const response = await fetch(`${baseUrl}${path}`);
+    await response.arrayBuffer();
+    if (!response.ok) throw new Error(`Warm lỗi HTTP ${response.status}: ${path}`);
+  };
+  await mapConcurrent(paths, concurrency, fetchOne);
+  await mapConcurrent(paths, concurrency, fetchOne);
 }
 
 async function purgeUrls(paths) {
@@ -107,16 +113,7 @@ async function mapConcurrent(items, concurrency, worker) {
 }
 
 async function inspect(paths, label) {
-  const states = await mapConcurrent(paths, 20, async (path) => {
-    // Node does not keep a browser HTTP cache, so a plain request measures the CDN directly.
-    const response = await fetch(`${baseUrl}${path}`);
-    await response.arrayBuffer();
-    const xCache = (response.headers.get("x-cache") || "").toUpperCase();
-    const age = Number(response.headers.get("age") || 0);
-    if (xCache.includes("HIT") || age > 0) return "HIT";
-    if (xCache.includes("MISS") || age === 0) return "MISS";
-    return "UNKNOWN";
-  });
+  const states = await mapConcurrent(paths, concurrency, inspectPath);
   const summary = states.reduce(
     (result, state) => ({ ...result, [state]: result[state] + 1 }),
     { HIT: 0, MISS: 0, UNKNOWN: 0 }
@@ -125,6 +122,77 @@ async function inspect(paths, label) {
     `${label}: HIT=${summary.HIT} MISS=${summary.MISS} UNKNOWN=${summary.UNKNOWN} TOTAL=${paths.length}`
   );
   return summary;
+}
+
+async function inspectPath(path) {
+  // Node does not keep a browser HTTP cache, so this measures the CDN directly.
+  const response = await fetch(`${baseUrl}${path}`);
+  await response.arrayBuffer();
+  const xCache = (response.headers.get("x-cache") || "").toUpperCase();
+  const ageHeader = response.headers.get("age");
+  const age = ageHeader === null ? null : Number(ageHeader);
+  if (xCache.includes("HIT") || age > 0) return "HIT";
+  if (xCache.includes("MISS") || age === 0) return "MISS";
+  return "UNKNOWN";
+}
+
+async function waitUntilPurged(paths, startedAt) {
+  let pending = paths.slice();
+  let observedMiss = 0;
+  let rounds = 0;
+  while (pending.length && Date.now() - startedAt < measureTimeoutMs) {
+    rounds += 1;
+    const states = await mapConcurrent(pending, concurrency, inspectPath);
+    const nextPending = [];
+    states.forEach((state, index) => {
+      if (state === "MISS") observedMiss += 1;
+      else nextPending.push(pending[index]);
+    });
+    pending = nextPending;
+    console.log(
+      `Lần đo ${rounds}: MISS=${observedMiss}/${paths.length}, còn chờ=${pending.length}, elapsed=${Date.now() - startedAt}ms`
+    );
+    if (pending.length) await sleep(pollIntervalMs);
+  }
+  return { observedMiss, pending: pending.length, rounds };
+}
+
+async function measurePurge(paths, purge, label) {
+  console.log(`\n[MEASURE] ${label} — ${paths.length} object(s)`);
+  console.log(`Concurrency=${concurrency}; domain=${domain}`);
+  const warmStarted = Date.now();
+  await warm(paths);
+  console.log(`Warm hoàn tất sau ${Date.now() - warmStarted}ms`);
+  const before = await inspect(paths, "Trước purge");
+  if (before.HIT !== paths.length) {
+    throw new Error(`Trạng thái đầu vào chưa warm đủ: HIT=${before.HIT}/${paths.length}`);
+  }
+
+  const purgeStarted = Date.now();
+  await purge();
+  const apiAcceptedMs = Date.now() - purgeStarted;
+  const observation = await waitUntilPurged(paths, purgeStarted);
+  const observedMs = Date.now() - purgeStarted;
+  const success = observation.pending === 0;
+  const result = {
+    mode: label,
+    objects: paths.length,
+    apiAcceptedMs,
+    observedMs,
+    miss: observation.observedMiss,
+    pending: observation.pending,
+    rounds: observation.rounds,
+    success,
+  };
+  console.log("\nKẾT QUẢ ĐO");
+  console.table([result]);
+  console.log(
+    success
+      ? `Purge toàn bộ được xác nhận trong <= ${observedMs}ms (API phản hồi ${apiAcceptedMs}ms).`
+      : `Hết ${measureTimeoutMs}ms nhưng mới quan sát MISS=${observation.observedMiss}/${paths.length}.`
+  );
+  process.exitCode = success ? 0 : 2;
+  return result;
 }
 
 async function runUrlTest(count) {
@@ -161,13 +229,26 @@ async function runPrefixTest(count) {
 
 async function main() {
   if (command === "url") {
-    validateAmount([1, 10, 50, 100]);
+    validateAmount();
     await runUrlTest(amount);
     return;
   }
   if (command === "prefix") {
-    validateAmount([100, 500, 1000]);
+    validateAmount();
     await runPrefixTest(amount);
+    return;
+  }
+  if (command === "measure-url") {
+    validateAmount();
+    const paths = groupPaths(`url-${amount}`, amount);
+    await measurePurge(paths, () => purgeUrls(paths), "url");
+    return;
+  }
+  if (command === "measure-prefix") {
+    validateAmount();
+    const group = `folder-${amount}`;
+    const paths = groupPaths(group, amount);
+    await measurePurge(paths, () => purgePrefix(`/cdn-test/${group}/`), "prefix");
     return;
   }
   if (command === "all") {
@@ -187,6 +268,8 @@ async function main() {
   node cdn-api-test.js prefix 100
   node cdn-api-test.js prefix 500
   node cdn-api-test.js prefix 1000
+  node cdn-api-test.js measure-url 100
+  node cdn-api-test.js measure-prefix 10000
   node cdn-api-test.js all`);
 }
 

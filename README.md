@@ -36,9 +36,35 @@ node cdn-api-test.js url 100
 node cdn-api-test.js prefix 100
 node cdn-api-test.js prefix 500
 node cdn-api-test.js prefix 1000
+node cdn-api-test.js prefix 5000
+node cdn-api-test.js prefix 10000
 ```
 
 Hoặc chạy toàn bộ bằng `node cdn-api-test.js all`. Script không hiển thị API key trong log.
+
+Có thể truyền mọi số lượng từ 1 đến 10.000. Để đo thời gian purge thực tế:
+
+```bash
+# Đo purge theo danh sách URL; hữu ích để tìm giới hạn API
+node cdn-api-test.js measure-url 100
+
+# Đo purge một folder gồm 10.000 object
+node cdn-api-test.js measure-prefix 10000
+```
+
+Kết quả tách riêng `apiAcceptedMs` (thời gian API phản hồi) và `observedMs`
+(thời gian từ lúc gửi purge đến khi đã quan sát đủ object ở trạng thái MISS).
+Có thể chỉnh tải và thời gian chờ bằng `CDN_TEST_CONCURRENCY`,
+`PURGE_MEASURE_TIMEOUT_MS` và `PURGE_POLL_INTERVAL_MS`.
+
+Nếu thao tác purge thủ công trên dashboard, dùng `cdn-purge-test.sh`. Lệnh kiểm tra
+đã chạy song song và hỗ trợ đến 10.000 object:
+
+```bash
+./cdn-purge-test.sh warm-folder 10000
+./cdn-purge-test.sh prefix 10000
+./cdn-purge-test.sh check-folder 10000
+```
 
 ## Thay ảnh mặc định
 
