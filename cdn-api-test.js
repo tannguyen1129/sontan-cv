@@ -86,14 +86,14 @@ async function apiRequest(endpoint, body) {
   return payload;
 }
 
-function waitForEnter(message) {
+function askTerminal(message) {
   if (!process.stdin.isTTY) {
     throw new Error("Chế độ manual cần chạy trong terminal tương tác.");
   }
   const terminal = readline.createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise((resolve) => terminal.question(message, () => {
+  return new Promise((resolve) => terminal.question(message, (answer) => {
     terminal.close();
-    resolve();
+    resolve(answer.trim());
   }));
 }
 
@@ -212,7 +212,7 @@ async function measurePurge(paths, purge, label) {
   return result;
 }
 
-async function measureManual(paths, label, purgeInstruction) {
+async function measureManual(paths, label, purgeTarget, purgeInstruction) {
   console.log(`\n[MANUAL MEASURE] ${label} — ${paths.length} object(s)`);
   console.log(`Domain khóa cứng: ${domain}`);
   const warmStarted = Date.now();
@@ -223,7 +223,12 @@ async function measureManual(paths, label, purgeInstruction) {
     throw new Error(`Trạng thái đầu vào chưa warm đủ: HIT=${before.HIT}/${paths.length}`);
   }
   console.log(`\nChuẩn bị trên dashboard: ${purgeInstruction}`);
-  await waitForEnter("Khi con trỏ đã đặt trên nút Purge, nhấn Enter tại đây rồi bấm Purge ngay: ");
+  console.log(`TARGET CẦN PURGE: ${purgeTarget}`);
+  const confirmedTarget = await askTerminal("Dán lại chính xác target đang nhập trên dashboard để xác nhận: ");
+  if (confirmedTarget !== purgeTarget) {
+    throw new Error(`Sai target. Script đo '${purgeTarget}' nhưng dashboard đang dùng '${confirmedTarget || "(trống)"}'.`);
+  }
+  await askTerminal("Đặt con trỏ lên nút Purge, nhấn Enter tại đây rồi bấm Purge ngay: ");
   const purgeStarted = Date.now();
   process.stdout.write("\x07");
   console.log("ĐANG ĐO — hãy bấm Purge trên dashboard ngay bây giờ.");
@@ -307,6 +312,7 @@ async function main() {
     await measureManual(
       paths,
       "url/manual",
+      `${amount} URL trong nhóm /cdn-test/url-${amount}/`,
       `By URL — dán danh sách từ lệnh ./cdn-purge-test.sh urls ${amount}`
     );
     return;
@@ -315,7 +321,8 @@ async function main() {
     validateAmount();
     const group = `folder-${amount}`;
     const paths = groupPaths(group, amount);
-    await measureManual(paths, "prefix/manual", `By Prefix — /cdn-test/${group}/`);
+    const prefix = `/cdn-test/${group}/`;
+    await measureManual(paths, "prefix/manual", prefix, `By Prefix — ${prefix}`);
     return;
   }
   if (command === "all") {

@@ -59,8 +59,18 @@ node cdn-api-test.js measure-manual-url 100
 node cdn-api-test.js measure-manual-prefix 10000
 ```
 
+Số cuối lệnh chính là số object và tên folder cần purge; có thể dùng bất kỳ mức
+nào từ 1 đến 10.000. Ví dụ, purge 5.000 object phải chạy:
+
+```bash
+node cdn-api-test.js measure-manual-prefix 5000
+# Dashboard phải purge đúng: /cdn-test/folder-5000/
+```
+
 Script sẽ warm và xác nhận toàn bộ object đang HIT, sau đó dừng chờ. Đặt con trỏ
-trên nút **Purge** của dashboard, nhấn Enter trong terminal và bấm **Purge** ngay.
+trên nút **Purge** của dashboard. Trước khi đo, script yêu cầu dán lại target và
+chỉ tiếp tục khi target khớp tuyệt đối, tránh đo nhầm folder. Sau đó nhấn Enter
+trong terminal và bấm **Purge** ngay.
 Đồng hồ sẽ dừng khi đã quan sát đủ toàn bộ object chuyển sang MISS.
 
 Kết quả tách riêng `apiAcceptedMs` (thời gian API phản hồi) và `observedMs`
