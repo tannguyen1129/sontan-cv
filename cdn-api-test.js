@@ -1,4 +1,5 @@
 const fs = require("fs");
+const readline = require("readline");
 
 function readEnvFile() {
   if (!fs.existsSync(".env")) return {};
@@ -75,9 +76,25 @@ async function apiRequest(endpoint, body) {
   );
   if (!response.ok) {
     console.error(JSON.stringify(payload, null, 2));
+    if (response.status === 405) {
+      console.error(
+        "Endpoint hiện không nhận POST. Dùng measure-manual-prefix/measure-manual-url để đo qua dashboard."
+      );
+    }
     throw new Error(`${endpoint} bị từ chối với HTTP ${response.status}`);
   }
   return payload;
+}
+
+function waitForEnter(message) {
+  if (!process.stdin.isTTY) {
+    throw new Error("Chế độ manual cần chạy trong terminal tương tác.");
+  }
+  const terminal = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => terminal.question(message, () => {
+    terminal.close();
+    resolve();
+  }));
 }
 
 async function warm(paths) {
@@ -195,6 +212,39 @@ async function measurePurge(paths, purge, label) {
   return result;
 }
 
+async function measureManual(paths, label, purgeInstruction) {
+  console.log(`\n[MANUAL MEASURE] ${label} — ${paths.length} object(s)`);
+  console.log(`Domain khóa cứng: ${domain}`);
+  const warmStarted = Date.now();
+  await warm(paths);
+  console.log(`Warm hoàn tất sau ${Date.now() - warmStarted}ms`);
+  const before = await inspect(paths, "Trước purge");
+  if (before.HIT !== paths.length) {
+    throw new Error(`Trạng thái đầu vào chưa warm đủ: HIT=${before.HIT}/${paths.length}`);
+  }
+  console.log(`\nChuẩn bị trên dashboard: ${purgeInstruction}`);
+  await waitForEnter("Khi con trỏ đã đặt trên nút Purge, nhấn Enter tại đây rồi bấm Purge ngay: ");
+  const purgeStarted = Date.now();
+  process.stdout.write("\x07");
+  console.log("ĐANG ĐO — hãy bấm Purge trên dashboard ngay bây giờ.");
+  const observation = await waitUntilPurged(paths, purgeStarted);
+  const observedMs = Date.now() - purgeStarted;
+  const success = observation.pending === 0;
+  console.log("\nKẾT QUẢ ĐO THỦ CÔNG");
+  console.table([{
+    mode: label,
+    objects: paths.length,
+    observedMs,
+    observedSeconds: (observedMs / 1000).toFixed(2),
+    miss: observation.observedMiss,
+    pending: observation.pending,
+    rounds: observation.rounds,
+    success,
+  }]);
+  console.log("Lưu ý: observedMs gồm độ trễ thao tác bấm nút và thời gian quét xác minh toàn bộ object.");
+  process.exitCode = success ? 0 : 2;
+}
+
 async function runUrlTest(count) {
   const paths = groupPaths(`url-${count}`, count);
   console.log(`\n[URL TEST] ${count} URL(s)`);
@@ -251,6 +301,23 @@ async function main() {
     await measurePurge(paths, () => purgePrefix(`/cdn-test/${group}/`), "prefix");
     return;
   }
+  if (command === "measure-manual-url") {
+    validateAmount();
+    const paths = groupPaths(`url-${amount}`, amount);
+    await measureManual(
+      paths,
+      "url/manual",
+      `By URL — dán danh sách từ lệnh ./cdn-purge-test.sh urls ${amount}`
+    );
+    return;
+  }
+  if (command === "measure-manual-prefix") {
+    validateAmount();
+    const group = `folder-${amount}`;
+    const paths = groupPaths(group, amount);
+    await measureManual(paths, "prefix/manual", `By Prefix — /cdn-test/${group}/`);
+    return;
+  }
   if (command === "all") {
     requireApiKey();
     const results = [];
@@ -270,6 +337,8 @@ async function main() {
   node cdn-api-test.js prefix 1000
   node cdn-api-test.js measure-url 100
   node cdn-api-test.js measure-prefix 10000
+  node cdn-api-test.js measure-manual-url 100
+  node cdn-api-test.js measure-manual-prefix 10000
   node cdn-api-test.js all`);
 }
 

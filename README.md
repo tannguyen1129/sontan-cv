@@ -52,6 +52,17 @@ node cdn-api-test.js measure-url 100
 node cdn-api-test.js measure-prefix 10000
 ```
 
+Nếu endpoint API trả `405 Not Allowed`, đo trực tiếp khi thao tác trên dashboard:
+
+```bash
+node cdn-api-test.js measure-manual-url 100
+node cdn-api-test.js measure-manual-prefix 10000
+```
+
+Script sẽ warm và xác nhận toàn bộ object đang HIT, sau đó dừng chờ. Đặt con trỏ
+trên nút **Purge** của dashboard, nhấn Enter trong terminal và bấm **Purge** ngay.
+Đồng hồ sẽ dừng khi đã quan sát đủ toàn bộ object chuyển sang MISS.
+
 Kết quả tách riêng `apiAcceptedMs` (thời gian API phản hồi) và `observedMs`
 (thời gian từ lúc gửi purge đến khi đã quan sát đủ object ở trạng thái MISS).
 Có thể chỉnh tải và thời gian chờ bằng `CDN_TEST_CONCURRENCY`,
