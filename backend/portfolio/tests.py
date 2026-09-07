@@ -1,4 +1,5 @@
 import os
+from django.test import override_settings
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase
@@ -23,6 +24,11 @@ class PortfolioApiTests(TestCase):
         response = self.client.post("/api/contact/", {"name":"Visitor", "email":"visitor@example.com", "subject":"Hello", "message":"A useful message"}, format="json", secure=True)
         self.assertEqual(response.status_code, 201)
         self.assertTrue(ContactMessage.objects.filter(email="visitor@example.com").exists())
+
+    @override_settings(CORS_ALLOWED_ORIGINS=["https://sontan.info"])
+    def test_custom_domain_receives_cors_header(self):
+        response = self.client.get("/api/", secure=True, HTTP_ORIGIN="https://sontan.info")
+        self.assertEqual(response["Access-Control-Allow-Origin"], "https://sontan.info")
 
     def test_admin_command_uses_environment(self):
         values = {"DJANGO_SUPERUSER_USERNAME":"owner", "DJANGO_SUPERUSER_EMAIL":"owner@example.com", "DJANGO_SUPERUSER_PASSWORD":"a-strong-test-password"}
