@@ -15,7 +15,7 @@ def portfolio(request):
     return Response({
         "profile": ProfileSerializer(profile).data if profile else None,
         "socials": SocialLinkSerializer(SocialLink.objects.filter(**visible), many=True).data,
-        "experiences": ExperienceSerializer(Experience.objects.filter(**visible), many=True).data,
+        "experiences": ExperienceSerializer(Experience.objects.filter(**visible).prefetch_related("positions"), many=True).data,
         "education": EducationSerializer(Education.objects.filter(**visible), many=True).data,
         "projects": ProjectSerializer(Project.objects.filter(**visible), many=True).data,
         "skills": SkillSerializer(Skill.objects.filter(**visible), many=True).data,

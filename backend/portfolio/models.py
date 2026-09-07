@@ -60,6 +60,24 @@ class Experience(OrderedModel):
     class Meta(OrderedModel.Meta): verbose_name = "Kinh nghiệm"; verbose_name_plural = "Kinh nghiệm"
     def __str__(self): return f"{self.role} @ {self.company}"
 
+class ExperiencePosition(OrderedModel):
+    experience = models.ForeignKey(Experience, related_name="positions", on_delete=models.CASCADE, verbose_name="Công ty")
+    role = models.CharField("Vị trí", max_length=120)
+    role_en = models.CharField("Role (English)", max_length=120, blank=True)
+    start_date = models.DateField("Bắt đầu")
+    end_date = models.DateField("Kết thúc", null=True, blank=True)
+    is_current = models.BooleanField("Đang làm việc", default=False)
+    employment_type = models.CharField("Hình thức", max_length=50, blank=True)
+    employment_type_en = models.CharField("Employment type (English)", max_length=50, blank=True)
+    description = models.TextField("Mô tả", blank=True)
+    description_en = models.TextField("Description (English)", blank=True)
+
+    class Meta(OrderedModel.Meta):
+        verbose_name = "Giai đoạn chức danh"
+        verbose_name_plural = "Các giai đoạn chức danh"
+
+    def __str__(self): return f"{self.role} @ {self.experience.company}"
+
 class Education(OrderedModel):
     class Month(models.IntegerChoices):
         JAN = 1, "01 - Tháng 1 / January"

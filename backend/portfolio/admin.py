@@ -2,7 +2,7 @@ import base64
 from datetime import datetime
 from django import forms
 from django.contrib import admin
-from .models import Award, Certification, ContactMessage, Education, Experience, Profile, Project, Skill, SocialLink, SoftSkill
+from .models import Award, Certification, ContactMessage, Education, Experience, ExperiencePosition, Profile, Project, Skill, SocialLink, SoftSkill
 
 admin.site.register(Profile)
 
@@ -82,6 +82,46 @@ class ExperienceAdminForm(forms.ModelForm):
             instance.save()
             self.save_m2m()
         return instance
+
+class ExperiencePositionInlineForm(forms.ModelForm):
+    start_period = forms.CharField(label="Bắt đầu", help_text=MONTH_YEAR_HELP, widget=MonthYearInput())
+    end_period = forms.CharField(label="Kết thúc", help_text="Để trống nếu đang làm việc.", required=False, widget=MonthYearInput())
+
+    class Meta:
+        model = ExperiencePosition
+        exclude = ("start_date", "end_date")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["start_period"].initial = self.instance.start_date.strftime("%m/%Y")
+            self.fields["end_period"].initial = self.instance.end_date.strftime("%m/%Y") if self.instance.end_date else ""
+
+    def clean(self):
+        cleaned = super().clean()
+        start = parse_month_year(cleaned.get("start_period"), "Bắt đầu")
+        end = parse_month_year(cleaned.get("end_period"), "Kết thúc", required=False)
+        if cleaned.get("is_current"):
+            end = None
+        elif not end:
+            self.add_error("end_period", "Hãy nhập tháng kết thúc hoặc chọn Đang làm việc.")
+        if start and end and end < start:
+            self.add_error("end_period", "Tháng kết thúc không được trước tháng bắt đầu.")
+        cleaned["parsed_start"], cleaned["parsed_end"] = start, end
+        return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.start_date = self.cleaned_data["parsed_start"]
+        instance.end_date = self.cleaned_data["parsed_end"]
+        if commit: instance.save()
+        return instance
+
+class ExperiencePositionInline(admin.StackedInline):
+    model = ExperiencePosition
+    form = ExperiencePositionInlineForm
+    extra = 0
+    fields = (("role", "role_en"), ("start_period", "end_period", "is_current"), ("employment_type", "employment_type_en"), ("description", "description_en"), ("order", "is_visible"))
 
 class EducationAdminForm(forms.ModelForm):
     start_period = forms.CharField(label="Bắt đầu", help_text=MONTH_YEAR_HELP, widget=MonthYearInput())
@@ -206,6 +246,7 @@ class AwardAdminForm(SinglePeriodFormMixin, forms.ModelForm):
 @admin.register(Experience)
 class ExperienceAdmin(admin.ModelAdmin):
     form = ExperienceAdminForm
+    inlines = (ExperiencePositionInline,)
     list_display = ("role", "company", "start_date", "is_current", "order", "is_visible")
     list_editable = ("order", "is_visible")
     list_filter = ("is_current", "is_visible")
