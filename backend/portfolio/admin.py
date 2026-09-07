@@ -40,6 +40,36 @@ class ExperienceAdminForm(forms.ModelForm):
             self.save_m2m()
         return instance
 
+class EducationAdminForm(forms.ModelForm):
+    logo_upload = forms.ImageField(
+        label="Tải logo trường", required=False,
+        help_text="PNG, JPG hoặc WebP; tối đa 512 KB. Để trống để giữ logo hiện tại.",
+    )
+    remove_logo = forms.BooleanField(label="Xóa logo hiện tại", required=False)
+
+    class Meta:
+        model = Education
+        exclude = ("school_logo",)
+
+    def clean_logo_upload(self):
+        logo = self.cleaned_data.get("logo_upload")
+        if logo and logo.size > 512 * 1024:
+            raise forms.ValidationError("Logo phải nhỏ hơn hoặc bằng 512 KB.")
+        return logo
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        logo = self.cleaned_data.get("logo_upload")
+        if self.cleaned_data.get("remove_logo"):
+            instance.school_logo = ""
+        elif logo:
+            mime = logo.content_type or "image/png"
+            instance.school_logo = f"data:{mime};base64,{base64.b64encode(logo.read()).decode('ascii')}"
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
+
 @admin.register(Experience)
 class ExperienceAdmin(admin.ModelAdmin):
     form = ExperienceAdminForm
@@ -49,6 +79,7 @@ class ExperienceAdmin(admin.ModelAdmin):
 
 @admin.register(Education)
 class EducationAdmin(admin.ModelAdmin):
+    form = EducationAdminForm
     list_display = ("school", "degree", "start_year", "end_year", "order", "is_visible")
     list_editable = ("order", "is_visible")
 

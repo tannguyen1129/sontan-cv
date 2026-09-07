@@ -58,6 +58,7 @@ class Experience(OrderedModel):
 
 class Education(OrderedModel):
     school = models.CharField("Trường", max_length=180)
+    school_logo = models.TextField("Logo trường", blank=True, help_text="Logo tải lên từ CMS, tối đa 512 KB")
     degree = models.CharField("Bằng cấp", max_length=150)
     degree_en = models.CharField("Degree (English)", max_length=150, blank=True)
     field_of_study = models.CharField("Chuyên ngành", max_length=150, blank=True)
