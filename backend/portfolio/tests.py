@@ -1,10 +1,12 @@
 import os
+from django import forms
 from django.test import override_settings
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 from .models import ContactMessage, Profile, Skill
+from .admin import parse_month_year
 
 class PortfolioApiTests(TestCase):
     def setUp(self):
@@ -43,3 +45,9 @@ class PortfolioApiTests(TestCase):
         user = get_user_model().objects.get(username="owner")
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.check_password("a-strong-test-password"))
+
+    def test_month_year_parser_accepts_expected_format(self):
+        parsed = parse_month_year("06/2025", "Thời gian")
+        self.assertEqual((parsed.month, parsed.year, parsed.day), (6, 2025, 1))
+        with self.assertRaises(forms.ValidationError):
+            parse_month_year("2025-06", "Thời gian")
