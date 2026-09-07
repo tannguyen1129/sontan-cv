@@ -25,6 +25,7 @@ def portfolio(request):
     })
 
 @api_view(["GET"])
+@throttle_classes([])
 def health(request): return Response({"status": "ok"})
 
 @api_view(["POST"])
@@ -34,4 +35,3 @@ def contact(request):
     serializer.is_valid(raise_exception=True)
     serializer.save()
     return Response({"message": "Tin nhắn đã được gửi. Cảm ơn bạn!"}, status=status.HTTP_201_CREATED)
-

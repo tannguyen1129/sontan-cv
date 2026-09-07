@@ -32,6 +32,11 @@ class PortfolioApiTests(TestCase):
         response = self.client.get("/api/", secure=True, HTTP_ORIGIN="https://sontan.info")
         self.assertEqual(response["Access-Control-Allow-Origin"], "https://sontan.info")
 
+    def test_health_check_is_not_rate_limited(self):
+        for _ in range(130):
+            response = self.client.get("/api/health/", secure=True)
+            self.assertEqual(response.status_code, 200)
+
     def test_admin_command_uses_environment(self):
         values = {"DJANGO_SUPERUSER_USERNAME":"owner", "DJANGO_SUPERUSER_EMAIL":"owner@example.com", "DJANGO_SUPERUSER_PASSWORD":"a-strong-test-password"}
         previous = {key: os.environ.get(key) for key in values}
