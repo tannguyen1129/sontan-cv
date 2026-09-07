@@ -61,13 +61,20 @@ class Experience(OrderedModel):
     def __str__(self): return f"{self.role} @ {self.company}"
 
 class Education(OrderedModel):
+    PROGRAM_TYPES = [
+        ("degree", "Bằng cấp / Degree"),
+        ("exchange", "Trao đổi sinh viên / Student exchange"),
+        ("course", "Khóa học / Course"),
+        ("other", "Khác / Other"),
+    ]
     school = models.CharField("Trường", max_length=180)
     school_en = models.CharField("School name (English)", max_length=180, blank=True)
     school_logo = models.TextField("Logo trường", blank=True, help_text="Logo tải lên từ CMS, tối đa 512 KB")
-    degree = models.CharField("Bằng cấp", max_length=150)
-    degree_en = models.CharField("Degree (English)", max_length=150, blank=True)
-    field_of_study = models.CharField("Chuyên ngành", max_length=150, blank=True)
-    field_of_study_en = models.CharField("Field of study (English)", max_length=150, blank=True)
+    program_type = models.CharField("Loại chương trình", max_length=20, choices=PROGRAM_TYPES, default="degree")
+    degree = models.CharField("Tên bằng cấp / chương trình", max_length=150)
+    degree_en = models.CharField("Degree / program name (English)", max_length=150, blank=True)
+    field_of_study = models.CharField("Chuyên ngành", max_length=150, blank=True, help_text="Chỉ dùng cho chương trình bằng cấp")
+    field_of_study_en = models.CharField("Field of study (English)", max_length=150, blank=True, help_text="Only used for degree programs")
     start_year = models.PositiveSmallIntegerField("Năm bắt đầu")
     end_year = models.PositiveSmallIntegerField("Năm kết thúc", null=True, blank=True)
     grade = models.CharField("Xếp loại / GPA", max_length=50, blank=True)
