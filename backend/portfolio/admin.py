@@ -80,7 +80,7 @@ class ExperienceAdmin(admin.ModelAdmin):
 @admin.register(Education)
 class EducationAdmin(admin.ModelAdmin):
     form = EducationAdminForm
-    list_display = ("school", "degree", "program_type", "start_year", "end_year", "order", "is_visible")
+    list_display = ("school", "degree", "program_type", "start_month", "start_year", "end_month", "end_year", "order", "is_visible")
     list_editable = ("order", "is_visible")
     list_filter = ("program_type", "is_visible")
 

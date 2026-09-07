@@ -61,6 +61,20 @@ class Experience(OrderedModel):
     def __str__(self): return f"{self.role} @ {self.company}"
 
 class Education(OrderedModel):
+    class Month(models.IntegerChoices):
+        JAN = 1, "01 - Tháng 1 / January"
+        FEB = 2, "02 - Tháng 2 / February"
+        MAR = 3, "03 - Tháng 3 / March"
+        APR = 4, "04 - Tháng 4 / April"
+        MAY = 5, "05 - Tháng 5 / May"
+        JUN = 6, "06 - Tháng 6 / June"
+        JUL = 7, "07 - Tháng 7 / July"
+        AUG = 8, "08 - Tháng 8 / August"
+        SEP = 9, "09 - Tháng 9 / September"
+        OCT = 10, "10 - Tháng 10 / October"
+        NOV = 11, "11 - Tháng 11 / November"
+        DEC = 12, "12 - Tháng 12 / December"
+
     PROGRAM_TYPES = [
         ("degree", "Bằng cấp / Degree"),
         ("exchange", "Trao đổi sinh viên / Student exchange"),
@@ -75,7 +89,9 @@ class Education(OrderedModel):
     degree_en = models.CharField("Degree / program name (English)", max_length=150, blank=True)
     field_of_study = models.CharField("Chuyên ngành", max_length=150, blank=True, help_text="Chỉ dùng cho chương trình bằng cấp")
     field_of_study_en = models.CharField("Field of study (English)", max_length=150, blank=True, help_text="Only used for degree programs")
+    start_month = models.PositiveSmallIntegerField("Tháng bắt đầu", choices=Month.choices, default=1)
     start_year = models.PositiveSmallIntegerField("Năm bắt đầu")
+    end_month = models.PositiveSmallIntegerField("Tháng kết thúc", choices=Month.choices, default=12)
     end_year = models.PositiveSmallIntegerField("Năm kết thúc", null=True, blank=True)
     grade = models.CharField("Xếp loại / GPA", max_length=50, blank=True)
     description = models.TextField("Mô tả", blank=True)
