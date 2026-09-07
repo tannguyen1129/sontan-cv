@@ -18,6 +18,7 @@ class Profile(models.Model):
     email = models.EmailField("Email")
     phone = models.CharField("Số điện thoại", max_length=30, blank=True)
     location = models.CharField("Địa điểm", max_length=120, blank=True)
+    location_en = models.CharField("Location (English)", max_length=120, blank=True)
     availability = models.CharField("Trạng thái làm việc", max_length=120, default="Open to opportunities")
     availability_en = models.CharField("Availability (English)", max_length=120, blank=True)
     avatar_url = models.URLField("URL ảnh đại diện", blank=True)
@@ -31,6 +32,7 @@ class Profile(models.Model):
 
 class SocialLink(OrderedModel):
     label = models.CharField("Tên mạng", max_length=50)
+    label_en = models.CharField("Social label (English)", max_length=50, blank=True)
     url = models.URLField("Đường dẫn")
     icon = models.CharField("Icon", max_length=30, help_text="github, linkedin, facebook, globe...")
     class Meta(OrderedModel.Meta): verbose_name = "Liên kết"; verbose_name_plural = "Liên kết"
@@ -38,6 +40,7 @@ class SocialLink(OrderedModel):
 
 class Experience(OrderedModel):
     company = models.CharField("Công ty", max_length=120)
+    company_en = models.CharField("Company name (English)", max_length=120, blank=True)
     company_logo = models.TextField("Logo công ty", blank=True, help_text="Logo tải lên từ CMS, tối đa 512 KB")
     role = models.CharField("Vị trí", max_length=120)
     role_en = models.CharField("Role (English)", max_length=120, blank=True)
@@ -45,6 +48,7 @@ class Experience(OrderedModel):
     end_date = models.DateField("Kết thúc", null=True, blank=True)
     is_current = models.BooleanField("Đang làm việc", default=False)
     location = models.CharField("Địa điểm", max_length=120, blank=True)
+    location_en = models.CharField("Location (English)", max_length=120, blank=True)
     employment_type = models.CharField("Hình thức", max_length=50, blank=True)
     employment_type_en = models.CharField("Employment type (English)", max_length=50, blank=True)
     description = models.TextField("Mô tả")
@@ -94,6 +98,7 @@ class Project(OrderedModel):
 class Skill(OrderedModel):
     CATEGORY = [("frontend", "Frontend"), ("backend", "Backend"), ("database", "Database"), ("devops", "DevOps & Tools"), ("other", "Khác")]
     name = models.CharField("Kỹ năng", max_length=80)
+    name_en = models.CharField("Skill name (English)", max_length=80, blank=True)
     category = models.CharField("Nhóm", max_length=20, choices=CATEGORY)
     level = models.PositiveSmallIntegerField("Mức độ (%)", default=75)
     icon = models.CharField("Icon / mã ngắn", max_length=30, blank=True)
