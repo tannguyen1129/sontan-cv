@@ -17,6 +17,7 @@ class PortfolioApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["profile"]["full_name"], "Test User")
         self.assertEqual([item["name"] for item in response.data["skills"]], ["Python"])
+        self.assertIn("headline_en", response.data["profile"])
 
     def test_contact_message_is_saved(self):
         response = self.client.post("/api/contact/", {"name":"Visitor", "email":"visitor@example.com", "subject":"Hello", "message":"A useful message"}, format="json", secure=True)

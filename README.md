@@ -16,6 +16,8 @@ CV điện tử full-stack với giao diện hiện đại, Django Admin làm CM
 - Kỹ năng chuyên môn theo nhóm và mức độ
 - Kỹ năng mềm, giải thưởng và chứng chỉ
 - Liên kết mạng xã hội và tin nhắn từ form liên hệ
+- Nội dung tiếng Việt và tiếng Anh, chuyển đổi trực tiếp trên giao diện
+- Upload logo công ty trực tiếp trong mục kinh nghiệm
 
 ## Chạy local
 

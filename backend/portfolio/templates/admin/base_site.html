@@ -1,0 +1,18 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} · Sơn Tân CMS{% endblock %}
+
+{% block branding %}
+<a id="site-name" href="{% url 'admin:index' %}">
+  <span class="cms-mark">ST</span>
+  <span>Sơn Tân <small>PORTFOLIO CMS</small></span>
+</a>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'portfolio/admin.css' %}">
+{% endblock %}
+
+{% block nav-global %}<span class="cms-status"><i></i> SYSTEM ONLINE</span>{% endblock %}

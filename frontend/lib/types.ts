@@ -1,10 +1,10 @@
-export type Profile = { full_name:string; headline:string; short_bio:string; long_bio:string; email:string; phone:string; location:string; availability:string; avatar_url:string; resume_url:string; years_experience:number; projects_count:number; coffee_count:number };
+export type Profile = { full_name:string; headline:string; headline_en?:string; short_bio:string; short_bio_en?:string; long_bio:string; long_bio_en?:string; email:string; phone:string; location:string; availability:string; availability_en?:string; avatar_url:string; resume_url:string; years_experience:number; projects_count:number; coffee_count:number };
 export type Social = {id:number; label:string; url:string; icon:string};
-export type Experience = {id:number; company:string; company_logo:string; role:string; start_date:string; end_date:string|null; is_current:boolean; location:string; employment_type:string; description:string; highlights:string[]; technologies:string[]; company_url:string};
-export type Education = {id:number; school:string; degree:string; field_of_study:string; start_year:number; end_year:number|null; grade:string; description:string; school_url:string};
-export type Project = {id:number; title:string; slug:string; tagline:string; description:string; cover_url:string; live_url:string; source_url:string; technologies:string[]; year:number; is_featured:boolean; accent:string};
+export type Experience = {id:number; company:string; company_logo:string; role:string; role_en?:string; start_date:string; end_date:string|null; is_current:boolean; location:string; employment_type:string; employment_type_en?:string; description:string; description_en?:string; highlights:string[]; highlights_en?:string[]; technologies:string[]; company_url:string};
+export type Education = {id:number; school:string; degree:string; degree_en?:string; field_of_study:string; field_of_study_en?:string; start_year:number; end_year:number|null; grade:string; description:string; description_en?:string; school_url:string};
+export type Project = {id:number; title:string; title_en?:string; slug:string; tagline:string; tagline_en?:string; description:string; description_en?:string; cover_url:string; live_url:string; source_url:string; technologies:string[]; year:number; is_featured:boolean; accent:string};
 export type Skill = {id:number; name:string; category:string; level:number; icon:string};
-export type SoftSkill = {id:number; name:string; description:string; icon:string};
-export type Award = {id:number; title:string; issuer:string; year:number; description:string; credential_url:string};
-export type Certification = {id:number; name:string; issuer:string; issued_date:string|null; expires_date:string|null; credential_id:string; credential_url:string};
+export type SoftSkill = {id:number; name:string; name_en?:string; description:string; description_en?:string; icon:string};
+export type Award = {id:number; title:string; title_en?:string; issuer:string; issuer_en?:string; year:number; description:string; description_en?:string; credential_url:string};
+export type Certification = {id:number; name:string; name_en?:string; issuer:string; issuer_en?:string; issued_date:string|null; expires_date:string|null; credential_id:string; credential_url:string};
 export type PortfolioData = {profile:Profile|null; socials:Social[]; experiences:Experience[]; education:Education[]; projects:Project[]; skills:Skill[]; soft_skills:SoftSkill[]; awards:Award[]; certifications:Certification[]};

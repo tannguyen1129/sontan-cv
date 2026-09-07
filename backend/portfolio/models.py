@@ -10,12 +10,16 @@ class OrderedModel(models.Model):
 class Profile(models.Model):
     full_name = models.CharField("Họ và tên", max_length=120)
     headline = models.CharField("Chức danh", max_length=180)
+    headline_en = models.CharField("Job title (English)", max_length=180, blank=True)
     short_bio = models.TextField("Giới thiệu ngắn", max_length=420)
+    short_bio_en = models.TextField("Short bio (English)", max_length=420, blank=True)
     long_bio = models.TextField("Giới thiệu chi tiết", blank=True)
+    long_bio_en = models.TextField("Detailed bio (English)", blank=True)
     email = models.EmailField("Email")
     phone = models.CharField("Số điện thoại", max_length=30, blank=True)
     location = models.CharField("Địa điểm", max_length=120, blank=True)
     availability = models.CharField("Trạng thái làm việc", max_length=120, default="Open to opportunities")
+    availability_en = models.CharField("Availability (English)", max_length=120, blank=True)
     avatar_url = models.URLField("URL ảnh đại diện", blank=True)
     resume_url = models.URLField("URL CV PDF", blank=True)
     years_experience = models.PositiveSmallIntegerField("Số năm kinh nghiệm", default=0)
@@ -36,13 +40,17 @@ class Experience(OrderedModel):
     company = models.CharField("Công ty", max_length=120)
     company_logo = models.TextField("Logo công ty", blank=True, help_text="Logo tải lên từ CMS, tối đa 512 KB")
     role = models.CharField("Vị trí", max_length=120)
+    role_en = models.CharField("Role (English)", max_length=120, blank=True)
     start_date = models.DateField("Bắt đầu")
     end_date = models.DateField("Kết thúc", null=True, blank=True)
     is_current = models.BooleanField("Đang làm việc", default=False)
     location = models.CharField("Địa điểm", max_length=120, blank=True)
     employment_type = models.CharField("Hình thức", max_length=50, blank=True)
+    employment_type_en = models.CharField("Employment type (English)", max_length=50, blank=True)
     description = models.TextField("Mô tả")
+    description_en = models.TextField("Description (English)", blank=True)
     highlights = models.JSONField("Điểm nổi bật", default=list, blank=True, help_text='Danh sách JSON, ví dụ ["Tăng tốc độ 40%"]')
+    highlights_en = models.JSONField("Highlights (English)", default=list, blank=True, help_text='JSON list, e.g. ["Improved performance by 40%"]')
     technologies = models.JSONField("Công nghệ", default=list, blank=True)
     company_url = models.URLField("Website công ty", blank=True)
     class Meta(OrderedModel.Meta): verbose_name = "Kinh nghiệm"; verbose_name_plural = "Kinh nghiệm"
@@ -51,20 +59,26 @@ class Experience(OrderedModel):
 class Education(OrderedModel):
     school = models.CharField("Trường", max_length=180)
     degree = models.CharField("Bằng cấp", max_length=150)
+    degree_en = models.CharField("Degree (English)", max_length=150, blank=True)
     field_of_study = models.CharField("Chuyên ngành", max_length=150, blank=True)
+    field_of_study_en = models.CharField("Field of study (English)", max_length=150, blank=True)
     start_year = models.PositiveSmallIntegerField("Năm bắt đầu")
     end_year = models.PositiveSmallIntegerField("Năm kết thúc", null=True, blank=True)
     grade = models.CharField("Xếp loại / GPA", max_length=50, blank=True)
     description = models.TextField("Mô tả", blank=True)
+    description_en = models.TextField("Description (English)", blank=True)
     school_url = models.URLField("Website trường", blank=True)
     class Meta(OrderedModel.Meta): verbose_name = "Học vấn"; verbose_name_plural = "Học vấn"
     def __str__(self): return self.school
 
 class Project(OrderedModel):
     title = models.CharField("Tên dự án", max_length=140)
+    title_en = models.CharField("Project title (English)", max_length=140, blank=True)
     slug = models.SlugField(unique=True)
     tagline = models.CharField("Mô tả ngắn", max_length=220)
+    tagline_en = models.CharField("Tagline (English)", max_length=220, blank=True)
     description = models.TextField("Mô tả chi tiết")
+    description_en = models.TextField("Detailed description (English)", blank=True)
     cover_url = models.URLField("URL ảnh bìa", blank=True)
     live_url = models.URLField("Website", blank=True)
     source_url = models.URLField("Mã nguồn", blank=True)
@@ -86,23 +100,30 @@ class Skill(OrderedModel):
 
 class SoftSkill(OrderedModel):
     name = models.CharField("Kỹ năng mềm", max_length=100)
+    name_en = models.CharField("Soft skill (English)", max_length=100, blank=True)
     description = models.CharField("Mô tả", max_length=240, blank=True)
+    description_en = models.CharField("Description (English)", max_length=240, blank=True)
     icon = models.CharField("Icon", max_length=30, default="sparkles")
     class Meta(OrderedModel.Meta): verbose_name = "Kỹ năng mềm"; verbose_name_plural = "Kỹ năng mềm"
     def __str__(self): return self.name
 
 class Award(OrderedModel):
     title = models.CharField("Tên giải thưởng", max_length=180)
+    title_en = models.CharField("Award title (English)", max_length=180, blank=True)
     issuer = models.CharField("Đơn vị cấp", max_length=140)
+    issuer_en = models.CharField("Issuer (English)", max_length=140, blank=True)
     year = models.PositiveSmallIntegerField("Năm")
     description = models.TextField("Mô tả", blank=True)
+    description_en = models.TextField("Description (English)", blank=True)
     credential_url = models.URLField("Minh chứng", blank=True)
     class Meta(OrderedModel.Meta): verbose_name = "Giải thưởng"; verbose_name_plural = "Giải thưởng"
     def __str__(self): return self.title
 
 class Certification(OrderedModel):
     name = models.CharField("Chứng chỉ", max_length=180)
+    name_en = models.CharField("Certification name (English)", max_length=180, blank=True)
     issuer = models.CharField("Đơn vị cấp", max_length=140)
+    issuer_en = models.CharField("Issuer (English)", max_length=140, blank=True)
     issued_date = models.DateField("Ngày cấp", null=True, blank=True)
     expires_date = models.DateField("Ngày hết hạn", null=True, blank=True)
     credential_id = models.CharField("Mã chứng chỉ", max_length=120, blank=True)
