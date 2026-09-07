@@ -1,103 +1,58 @@
-# Thiệp mời Tốt nghiệp 2026
+# Sơn Tân — Developer Portfolio & CMS
 
-Landing page tốt nghiệp tương tác: hiển thị ảnh ngẫu nhiên từ thư viện, nhận lời chúc và giữ thiệp mời ở một đường dẫn riêng.
+CV điện tử full-stack với giao diện hiện đại, Django Admin làm CMS và Next.js làm frontend tĩnh tốc độ cao.
 
-## Xem trên máy
+## Công nghệ
 
-Mở `index.html` trực tiếp hoặc chạy một web server đơn giản:
+- **Backend:** Django 5, Django REST Framework, PostgreSQL/SQLite, Gunicorn, WhiteNoise
+- **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS, shadcn/ui primitives, Lucide Icons
+- **Deploy:** Render Blueprint gồm Static Site, Python Web Service và PostgreSQL
 
-```bash
-python3 -m http.server 8080
-```
+## Nội dung quản lý trong CMS
 
-Sau đó truy cập `http://localhost:8080`.
+- Hồ sơ cá nhân, avatar URL, CV PDF, thông tin liên hệ
+- Học vấn và kinh nghiệm làm việc
+- Dự án nổi bật, link demo/source, tech stack và màu nhận diện
+- Kỹ năng chuyên môn theo nhóm và mức độ
+- Kỹ năng mềm, giải thưởng và chứng chỉ
+- Liên kết mạng xã hội và tin nhắn từ form liên hệ
 
-## Kho ảnh trực tuyến
+## Chạy local
 
-1. Chạy `supabase-setup.sql` một lần trong Supabase SQL Editor.
-2. Tạo tài khoản quản trị trong **Authentication > Users** với email đã cấu hình.
-3. Chạy `node build-config.js` trước khi xem trên máy.
-4. Khi deploy Blueprint, nhập `SUPABASE_URL` và `SUPABASE_ANON_KEY` trong Render.
-
-Nút **Quản trị** ở footer cho phép tài khoản quản trị thêm/xóa ảnh và xóa lời chúc. Khách truy cập có thể xem ảnh, xem lời chúc và gửi lời chúc mới.
-
-Sau khi cập nhật phiên bản có sổ lời chúc, hãy chạy lại toàn bộ `supabase-setup.sql` trong SQL Editor một lần để tạo bảng và các chính sách RLS cần thiết.
-
-## Kiểm thử VnCDN purge API
-
-Runner được khóa cứng và chỉ thao tác trên `graduation.sontan.info`, trong vùng `/cdn-test/`.
-Thêm `VNCDN_API_KEY` vào `.env`, sau đó chạy từng boundary test:
+Backend:
 
 ```bash
-node cdn-api-test.js url 1
-node cdn-api-test.js url 10
-node cdn-api-test.js url 50
-node cdn-api-test.js url 100
-node cdn-api-test.js prefix 100
-node cdn-api-test.js prefix 500
-node cdn-api-test.js prefix 1000
-node cdn-api-test.js prefix 5000
-node cdn-api-test.js prefix 10000
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
 ```
 
-Hoặc chạy toàn bộ bằng `node cdn-api-test.js all`. Script không hiển thị API key trong log.
+API ở `http://localhost:8000/api/`, CMS ở `http://localhost:8000/admin/`.
 
-Có thể truyền mọi số lượng từ 1 đến 10.000. Để đo thời gian purge thực tế:
+Frontend:
 
 ```bash
-# Đo purge theo danh sách URL; hữu ích để tìm giới hạn API
-node cdn-api-test.js measure-url 100
-
-# Đo purge một folder gồm 10.000 object
-node cdn-api-test.js measure-prefix 10000
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev
 ```
 
-Nếu endpoint API trả `405 Not Allowed`, đo trực tiếp khi thao tác trên dashboard:
+Website ở `http://localhost:3000`.
 
-```bash
-node cdn-api-test.js measure-manual-url 100
-node cdn-api-test.js measure-manual-prefix 10000
-```
+## Deploy miễn phí trên Render
 
-Số cuối lệnh chính là số object và tên folder cần purge; có thể dùng bất kỳ mức
-nào từ 1 đến 10.000. Ví dụ, purge 5.000 object phải chạy:
+1. Push repository lên GitHub/GitLab.
+2. Trong Render chọn **New > Blueprint**, kết nối repository và chọn `render.yaml`.
+3. Nhập `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL` và `DJANGO_SUPERUSER_PASSWORD`. Mật khẩu do bạn tự đặt và không nằm trong source code.
+4. Sau khi deploy, mở `https://sontan-portfolio-api.onrender.com/admin/` để điền nội dung thật.
 
-```bash
-node cdn-api-test.js measure-manual-prefix 5000
-# Dashboard phải purge đúng: /cdn-test/folder-5000/
-```
+Nếu tên service đã tồn tại, đổi tên trong `render.yaml`, rồi cập nhật `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` và `NEXT_PUBLIC_API_URL` theo URL mới.
 
-Script sẽ warm và xác nhận toàn bộ object đang HIT, sau đó dừng chờ. Đặt con trỏ
-trên nút **Purge** của dashboard. Trước khi đo, script yêu cầu dán lại target và
-chỉ tiếp tục khi target khớp tuyệt đối, tránh đo nhầm folder. Sau đó nhấn Enter
-trong terminal và bấm **Purge** ngay.
-Đồng hồ sẽ dừng khi đã quan sát đủ toàn bộ object chuyển sang MISS.
+> Lưu ý: web service miễn phí sẽ ngủ khi không hoạt động. PostgreSQL miễn phí của Render hiện hết hạn sau 30 ngày; để CMS lưu bền lâu cần nâng database hoặc trỏ `DATABASE_URL` sang PostgreSQL bên ngoài. Không dùng SQLite trên Render vì filesystem là tạm thời.
 
-Kết quả tách riêng `apiAcceptedMs` (thời gian API phản hồi) và `observedMs`
-(thời gian từ lúc gửi purge đến khi đã quan sát đủ object ở trạng thái MISS).
-Có thể chỉnh tải và thời gian chờ bằng `CDN_TEST_CONCURRENCY`,
-`PURGE_MEASURE_TIMEOUT_MS` và `PURGE_POLL_INTERVAL_MS`.
-
-Nếu thao tác purge thủ công trên dashboard, dùng `cdn-purge-test.sh`. Lệnh kiểm tra
-đã chạy song song và hỗ trợ đến 10.000 object:
-
-```bash
-./cdn-purge-test.sh warm-folder 10000
-./cdn-purge-test.sh prefix 10000
-./cdn-purge-test.sh check-folder 10000
-```
-
-## Thay ảnh mặc định
-
-- Cách nhanh: nhấn **Thay ảnh** ngay trên website. Ảnh chỉ được xử lý trong trình duyệt.
-- Cách cố định: thay `assets/portrait-placeholder.svg` bằng ảnh của bạn và sửa đường dẫn `src` trong `index.html`.
-
-Nên dùng ảnh chân dung dọc tỷ lệ 4:5, độ phân giải từ 1200 × 1500 px.
-
-## Deploy lên Render
-
-1. Đẩy thư mục này lên một repository GitHub.
-2. Trong Render, chọn **New > Blueprint** và kết nối repository.
-3. Render sẽ đọc `render.yaml`; xác nhận tạo Static Site.
-
-Không cần lệnh build. Thư mục publish là thư mục gốc (`.`).
+Biến môi trường mẫu nằm trong `backend/.env.example` và `frontend/.env.example`.
