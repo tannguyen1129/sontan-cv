@@ -65,7 +65,7 @@ export function Portfolio() {
   const [data, setData] = useState<PortfolioData>(demoData);
   const [menu, setMenu] = useState(false);
   const [dark, setDark] = useState(true);
-  const [lang, setLang] = useState<"vi" | "en">("vi");
+  const [lang, setLang] = useState<"vi" | "en">("en");
   const [journeyTab, setJourneyTab] = useState<"experience" | "education">("experience");
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
@@ -142,7 +142,7 @@ export function Portfolio() {
           </div>
           <div className="nav-actions">
             <button className="lang-switch" aria-label={t("Chuyển sang tiếng Anh", "Switch to Vietnamese")} onClick={() => setLang(lang === "vi" ? "en" : "vi")}>
-              {lang === "vi" ? "VI" : "EN"}
+              {lang === "vi" ? "EN" : "VI"}
             </button>
             <button aria-label={t("Đổi giao diện", "Toggle theme")} onClick={() => setDark(!dark)}>
               {dark ? <Sun /> : <Moon />}
