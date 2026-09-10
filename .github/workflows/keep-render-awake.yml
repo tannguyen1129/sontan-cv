@@ -18,4 +18,4 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Check API health
-        run: curl --fail --silent --show-error --max-time 90 --retry 2 --retry-delay 10 https://sontan-portfolio-api.onrender.com/api/health/
+        run: curl --fail --silent --show-error --max-time 90 --retry 2 --retry-delay 10 https://api.sontan.info/api/health/

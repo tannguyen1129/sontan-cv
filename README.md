@@ -51,7 +51,7 @@ Website ở `http://localhost:3000`.
 1. Push repository lên GitHub/GitLab.
 2. Trong Render chọn **New > Blueprint**, kết nối repository và chọn `render.yaml`.
 3. Nhập `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL` và `DJANGO_SUPERUSER_PASSWORD`. Mật khẩu do bạn tự đặt và không nằm trong source code.
-4. Sau khi deploy, mở `https://sontan-portfolio-api.onrender.com/admin/` để điền nội dung thật.
+4. Sau khi deploy, mở `https://api.sontan.info/admin/` để điền nội dung thật.
 
 Nếu tên service đã tồn tại, đổi tên trong `render.yaml`, rồi cập nhật `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` và `NEXT_PUBLIC_API_URL` theo URL mới.
 
