@@ -61,8 +61,10 @@ function SectionTitle({ eyebrow, title, copy }: { eyebrow: string; title: string
   );
 }
 
-export function Portfolio() {
-  const [data, setData] = useState<PortfolioData>(demoData);
+const PORTFOLIO_CACHE_KEY = "portfolio-data-v1";
+
+export function Portfolio({ initialData = demoData }: { initialData?: PortfolioData }) {
+  const [data, setData] = useState<PortfolioData>(initialData);
   const [menu, setMenu] = useState(false);
   const [dark, setDark] = useState(true);
   const [lang, setLang] = useState<"vi" | "en">("en");
@@ -74,13 +76,26 @@ export function Portfolio() {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
   useEffect(() => {
-    fetch(`${API}/`)
+    try {
+      const cached = localStorage.getItem(PORTFOLIO_CACHE_KEY);
+      if (cached) setData(JSON.parse(cached));
+    } catch {}
+
+    const controller = new AbortController();
+    fetch(`${API}/`, { signal: controller.signal })
       .then((r) => {
         if (!r.ok) throw Error();
         return r.json();
       })
-      .then((d) => setData({ ...demoData, ...d, profile: d.profile || demoData.profile }))
+      .then((d) => {
+        const fresh = { ...demoData, ...d, profile: d.profile || demoData.profile };
+        setData(fresh);
+        try {
+          localStorage.setItem(PORTFOLIO_CACHE_KEY, JSON.stringify(fresh));
+        } catch {}
+      })
       .catch(() => {});
+    return () => controller.abort();
   }, []);
   const p = data.profile!;
   const t = (vi: string, en: string) => (lang === "vi" ? vi : en);
