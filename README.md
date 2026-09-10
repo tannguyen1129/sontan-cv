@@ -55,6 +55,8 @@ Website ở `http://localhost:3000`.
 
 Nếu tên service đã tồn tại, đổi tên trong `render.yaml`, rồi cập nhật `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` và `NEXT_PUBLIC_API_URL` theo URL mới.
 
+GitHub Actions gọi endpoint health mỗi 10 phút để hạn chế API miễn phí bị spin down. Có thể kiểm tra hoặc chạy thủ công workflow **Keep Render API awake** trong tab Actions.
+
 > Lưu ý: web service miễn phí sẽ ngủ khi không hoạt động. PostgreSQL miễn phí của Render hiện hết hạn sau 30 ngày; để CMS lưu bền lâu cần nâng database hoặc trỏ `DATABASE_URL` sang PostgreSQL bên ngoài. Không dùng SQLite trên Render vì filesystem là tạm thời.
 
 Biến môi trường mẫu nằm trong `backend/.env.example` và `frontend/.env.example`.

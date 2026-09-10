@@ -81,21 +81,43 @@ export function Portfolio({ initialData = demoData }: { initialData?: PortfolioD
       if (cached) setData(JSON.parse(cached));
     } catch {}
 
-    const controller = new AbortController();
-    fetch(`${API}/`, { signal: controller.signal })
-      .then((r) => {
-        if (!r.ok) throw Error();
-        return r.json();
-      })
-      .then((d) => {
-        const fresh = { ...demoData, ...d, profile: d.profile || demoData.profile };
+    let controller: AbortController | null = null;
+    let fetching = false;
+    const refresh = async () => {
+      if (fetching || document.visibilityState === "hidden") return;
+      fetching = true;
+      controller = new AbortController();
+      try {
+        const response = await fetch(`${API}/`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) throw Error();
+        const freshData = await response.json();
+        const fresh = { ...demoData, ...freshData, profile: freshData.profile || demoData.profile };
         setData(fresh);
         try {
           localStorage.setItem(PORTFOLIO_CACHE_KEY, JSON.stringify(fresh));
         } catch {}
-      })
-      .catch(() => {});
-    return () => controller.abort();
+      } catch {
+        // Keep rendering the build snapshot or last successful browser cache.
+      } finally {
+        fetching = false;
+      }
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    void refresh();
+    const interval = window.setInterval(refresh, 60_000);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    window.addEventListener("focus", refreshWhenVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      window.removeEventListener("focus", refreshWhenVisible);
+      controller?.abort();
+    };
   }, []);
   const p = data.profile!;
   const t = (vi: string, en: string) => (lang === "vi" ? vi : en);
